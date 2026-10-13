@@ -40,6 +40,19 @@ Each bundle comes with two tests:
 - for SmartFusion 2 and IGLOO 2, synthesis with Yosys' `synth_sf2`, which
   reports LUT, flip-flop and carry usage without a license.
 
+## Programming the Hello FPGA kit
+
+The kit's on-board PIC32 programs the SmartFusion 2 from a DirectC `.dat`
+file sent over the kit's USB serial port; no FlashPro is needed.
+`hello-fpga-cli` drives it, on Linux and on macOS:
+
+```sh
+nix run .#hello-fpga-cli -- program design.dat --port /dev/ttyACM0
+```
+
+It is packaged from [captndo/hello-fpga-cli][hello-fpga-cli], which has no
+license yet.
+
 ## Development
 
 ```sh
@@ -56,3 +69,5 @@ The Nix code and scripts in this repository are licensed under the MIT
 license, see `LICENSES/MIT.txt`. Microchip's software is proprietary: every
 user downloads it from Microchip themselves, and nothing built from it may
 be redistributed.
+
+[hello-fpga-cli]: https://github.com/captndo/hello-fpga-cli

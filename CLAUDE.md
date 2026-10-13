@@ -46,6 +46,9 @@ nix flake check --all-systems --no-update-lock-file &&
   `lib.meta.availableOn`. Free packages are checks, and so are all
   packages' `passthru.tests` (named `<package>-<test>`). Unfree packages
   are not built by the checks, because they need the Microchip downloads.
+- `pkgs/hello-fpga-cli`: host CLI for the Hello FPGA kit's PIC32
+  programmer (DirectC `.dat` files over the kit's USB serial port). Upstream
+  has no license, so the package has no `meta.license`.
 - `pkgs/flexlm-license-rewrite`: rewrites the user-editable lines of a
   FlexLM license (SERVER host and port, VENDOR/DAEMON path and port) and
   copies the signed FEATURE/INCREMENT lines unchanged, so a license

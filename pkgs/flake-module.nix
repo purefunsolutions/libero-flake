@@ -7,6 +7,7 @@
 let
   ourPackages = final: {
     flexlm-license-rewrite = final.callPackage ./flexlm-license-rewrite/package.nix {};
+    hello-fpga-cli = final.callPackage ./hello-fpga-cli/package.nix {};
   };
 
   # Functions, not packages.
