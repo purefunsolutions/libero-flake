@@ -69,6 +69,22 @@ nix flake check --all-systems --no-update-lock-file &&
   - test: Yosys synthesis. `synth_sf2` maps to CFG LUTs, SLE flip-flops,
     ARI1 carry chains and IO/clock buffers. It infers no LSRAM, µSRAM or
     math blocks, and there is no open place and route for these families.
+- `pkgs/libero-project/runner.sh`: `passthru.runner` of every bundle,
+  built purely by Nix and run with `nix run`. Libero needs the network for
+  its license, so it never runs inside a Nix build (no impure derivations,
+  no `__noChroot`). The runner:
+  - needs `LM_LICENSE_FILE` (exit 3 without it), and refuses an existing
+    output directory unless `--force` (exit 2);
+  - runs Libero in a scratch copy of the bundle with its own `HOME` and
+    `XDG_*` directories;
+  - takes a host-local `flock`, because the free license has one seat;
+  - retries with backoff while the seat is busy (FlexLM -4) or the server
+    is unreachable (-15, -96, -97). Any other license error exits 4, and
+    a build failure exits 1. Both keep the work directory;
+  - moves the exports, reports, logs and `manifest.txt` into place
+    atomically, and only after every format in `exports` was written;
+  - is tested with `tests/libero-stub.sh` standing in for `libero`, and is
+    null until a `libero` package is in scope.
 
 ## Conventions
 

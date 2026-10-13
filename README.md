@@ -34,11 +34,29 @@ the project, runs synthesis, place and route and timing analysis, and
 exports the programming files. Building a bundle needs no Microchip
 software.
 
-Each bundle comes with two tests:
+Each bundle comes with these tests:
 
 - a dry run of its Tcl with every Libero command stubbed out;
+- its runner against a stub Libero;
 - for SmartFusion 2 and IGLOO 2, synthesis with Yosys' `synth_sf2`, which
   reports LUT, flip-flop and carry usage without a license.
+
+### Building with Libero
+
+Libero checks its license out from a FlexLM server over the network, which
+a Nix build cannot reach. So Nix only builds the bundle and a runner
+script; `nix run` executes the runner on an x86_64-linux machine:
+
+```sh
+LM_LICENSE_FILE=1702@licenses.example.org nix run .#<design> -- -o out/<design>
+```
+
+The runner copies the bundle to a scratch directory and runs Libero
+headless with its own `HOME`. It moves the programming files, reports and
+logs to the output directory (default `./out/<design>`) only when every
+requested programming file was exported. The free license has a single
+seat: runs on one host take turns, and while the seat is in use elsewhere
+the runner retries with backoff.
 
 ## Programming the Hello FPGA kit
 

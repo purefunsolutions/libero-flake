@@ -24,14 +24,25 @@
 # the programming files (tcl/build.tcl). Building it needs no vendor tools;
 # running it needs Libero and a license.
 #
+# passthru.runner: `nix run` target that builds the bundle with Libero
+# outside the Nix sandbox, where the license server is reachable (see
+# runner.sh). Null until a `libero` package is in scope.
+#
 # passthru.tests: a dry run of the Tcl with every Libero command stubbed
-# (compared against `liberoCalls` if given), and Yosys synthesis for the
-# families Yosys supports.
+# (compared against `liberoCalls` if given), the runner against a stub
+# libero, and Yosys synthesis for the families Yosys supports.
 {
   lib,
   runCommand,
+  writeShellApplication,
+  coreutils,
+  findutils,
+  flock,
+  gnugrep,
+  gnused,
   tcl,
   yosys,
+  libero ? null,
 }: {
   pname,
   version ? "0",
@@ -90,10 +101,15 @@
   bundle =
     runCommand "${pname}-libero-project-${version}" {
       passthru = {
-        inherit device top;
+        inherit device top mkRunner;
+        runner =
+          if libero == null
+          then null
+          else mkRunner {liberoPackage = libero;};
         tests =
           {
             libero-calls = dryRun;
+            runner = runnerTest;
           }
           // lib.optionalAttrs (yosysSynth ? ${device.family} && hdlLanguage == "VERILOG") {
             yosys = synth;
@@ -174,6 +190,68 @@
         diff -u ${liberoCalls} $out
       ''}
     '';
+
+  # The runner takes the libero package as an argument, so the test can
+  # use a stub.
+  mkRunner = {liberoPackage}:
+    writeShellApplication {
+      name = pname;
+      runtimeInputs = [liberoPackage coreutils findutils flock gnugrep];
+      runtimeEnv = {
+        BUNDLE = bundle;
+        NAME = pname;
+        PROJECT = params."project(name)";
+        EXPORTS = toString exports;
+      };
+      text = builtins.readFile ./runner.sh;
+      meta = {
+        description = "Build ${pname} with Libero";
+        platforms = liberoPackage.meta.platforms or lib.platforms.all;
+      };
+    };
+
+  stubLibero = writeShellApplication {
+    name = "libero";
+    runtimeInputs = [coreutils gnused];
+    text = builtins.readFile ./tests/libero-stub.sh;
+  };
+
+  runnerTest = runCommand "${pname}-runner-test" {} ''
+    run=${lib.getExe (mkRunner {liberoPackage = stubLibero;})}
+    export STUB_STATE=$PWD/state XDG_RUNTIME_DIR=$PWD LIBERO_RETRY_DELAY=0
+    mkdir state
+
+    expect() { # status, command...
+      local want=$1 status=0
+      shift
+      "$@" || status=$?
+      if [ "$status" != "$want" ]; then
+        echo "error: expected exit status $want, got $status: $*" >&2
+        exit 1
+      fi
+    }
+
+    expect 3 env STUB_SCENARIO=ok $run -o no-license
+
+    export LM_LICENSE_FILE=1702@licenses.example.org
+    expect 0 env STUB_SCENARIO=ok $run -o ok
+    test -f ok/${params."project(name)"}.dat
+    test -f ok/${params."project(name)"}.stp
+    test -f ok/reports/top_report.rpt
+    test -f ok/manifest.txt
+
+    expect 2 env STUB_SCENARIO=ok $run -o ok
+    expect 0 env STUB_SCENARIO=ok $run -o ok --force
+
+    rm state/calls
+    expect 0 env STUB_SCENARIO=busy-twice $run -o busy
+    test "$(cat state/calls)" = 3
+
+    expect 1 env STUB_SCENARIO=fail $run -o failed
+    test ! -e failed
+
+    touch $out
+  '';
 
   synth =
     runCommand "${pname}-yosys" {
