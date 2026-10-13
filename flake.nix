@@ -19,6 +19,7 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         ./nix
+        ./pkgs/flake-module.nix
       ];
       # The Microchip tools are x86_64-linux only; everything else is
       # portable, so checks and formatting also run on the other two.

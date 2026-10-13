@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 Mika Tammi
+# SPDX-License-Identifier: MIT
+#
+# Synthetic license for the rewrite test. The host ID, features and
+# signatures are made up; no vendor daemon accepts this file.
+SERVER licensehost 0123456789AB 1702
+DAEMON actlmgrd /usr/local/flexlm/bin/actlmgrd
+DAEMON saltd /usr/local/flexlm/bin/saltd
+VENDOR snpslmd /usr/local/flexlm/bin/snpslmd \
+	/usr/local/flexlm/snpslmd.opt
+USE_SERVER
+
+FEATURE example_design actlmgrd 2027.01 31-dec-2027 1 SIGN="0000 1111 \
+	2222 3333 4444 5555"
+INCREMENT example_synthesis snpslmd 2027.01 31-dec-2027 1 \
+	VENDOR_STRING="example" SIGN="AAAA BBBB CCCC"
+FEATURE example_simulation saltd 2027.01 31-dec-2027 1 SIGN=DEADBEEF

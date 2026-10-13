@@ -3,6 +3,7 @@
 {
   imports = [
     ./checks.nix
+    ./nixpkgs.nix
     ./treefmt.nix
   ];
 }

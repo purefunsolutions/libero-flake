@@ -21,10 +21,14 @@
         # GitHub-flavoured Markdown: plain mdformat would mangle tables.
         plugins = ps: [ps.mdformat-gfm];
       };
+      ruff-check.enable = true;
+      ruff-format.enable = true;
     };
 
-    # Files without a formatter.
+    # Files without a formatter, and test fixtures that must stay byte
+    # for byte as they are.
     settings.global.excludes = [
+      "*.lic"
       ".gitignore"
       "LICENSES/*"
       "flake.lock"

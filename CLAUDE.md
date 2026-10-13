@@ -38,8 +38,19 @@ nix flake check --all-systems --no-update-lock-file &&
 
 - `flake.nix`: flake-parts, systems x86_64-linux, aarch64-linux and
   aarch64-darwin.
-- `nix/`: flake-parts modules. `treefmt.nix` (formatters, `checks.treefmt`)
-  and `checks.nix` (`reuse lint`).
+- `nix/`: flake-parts modules. `treefmt.nix` (formatters, `checks.treefmt`),
+  `checks.nix` (`reuse lint`) and `nixpkgs.nix` (the `pkgs` every perSystem
+  module sees: nixpkgs plus our overlay).
+- `pkgs/flake-module.nix`: our packages, `pkgs/<name>/package.nix`,
+  exported as `overlays.default` and as `packages` filtered with
+  `lib.meta.availableOn`. Free packages are checks, and so are all
+  packages' `passthru.tests` (named `<package>-<test>`). Unfree packages
+  are not built by the checks, because they need the Microchip downloads.
+- `pkgs/flexlm-license-rewrite`: rewrites the user-editable lines of a
+  FlexLM license (SERVER host and port, VENDOR/DAEMON path and port) and
+  copies the signed FEATURE/INCREMENT lines unchanged, so a license
+  server can use the license exactly as Microchip emailed it. Tested on a
+  synthetic license under `tests/`; never commit a real license.
 
 ## Conventions
 
