@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "libero-flake"
+SPDX-PackageSupplier = "Mika Tammi <mikatammi@gmail.com>"
+
+# Files that cannot carry an SPDX comment themselves.
+
+[[annotations]]
+path = "flake.lock"
+SPDX-FileCopyrightText = "2026 Mika Tammi"
+SPDX-License-Identifier = "MIT"
