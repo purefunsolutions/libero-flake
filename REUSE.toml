@@ -8,3 +8,8 @@ SPDX-PackageSupplier = "Mika Tammi <mikatammi@gmail.com>"
 path = "flake.lock"
 SPDX-FileCopyrightText = "2026 Mika Tammi"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "**/*.golden"
+SPDX-FileCopyrightText = "2026 Mika Tammi"
+SPDX-License-Identifier = "MIT"

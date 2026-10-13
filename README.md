@@ -26,6 +26,20 @@ translation, for example in a VM with Rosetta and
 `extra-platforms = x86_64-linux`. On macOS, run them on such a VM or on an
 x86_64-linux host.
 
+## Designs
+
+`mkLiberoProject` (in `overlays.default`) turns HDL and constraints into a
+Libero project bundle. The bundle holds the sources plus Tcl that creates
+the project, runs synthesis, place and route and timing analysis, and
+exports the programming files. Building a bundle needs no Microchip
+software.
+
+Each bundle comes with two tests:
+
+- a dry run of its Tcl with every Libero command stubbed out;
+- for SmartFusion 2 and IGLOO 2, synthesis with Yosys' `synth_sf2`, which
+  reports LUT, flip-flop and carry usage without a license.
+
 ## Development
 
 ```sh

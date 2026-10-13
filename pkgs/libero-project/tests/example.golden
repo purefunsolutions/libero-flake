@@ -1,0 +1,17 @@
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+run_tool -name SYNTHESIZE
+run_tool -name PLACEROUTE
+run_tool -name VERIFYTIMING
+run_tool -name GENERATEPROGRAMMINGDATA
+export_bitstream_file -file_name libero_project_example -export_dir @work@/export -format {DAT STP} -trusted_facility_file 1 -trusted_facility_file_components FABRIC
+export_prog_job -job_file_name libero_project_example -export_dir @work@/export -bitstream_file_type TRUSTED_FACILITY -bitstream_file_components FABRIC
+save_project

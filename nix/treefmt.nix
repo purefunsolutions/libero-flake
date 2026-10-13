@@ -8,30 +8,40 @@
     inputs.treefmt-nix.flakeModule
   ];
 
-  perSystem.treefmt = {
-    projectRootFile = "flake.nix";
+  perSystem = {pkgs, ...}: {
+    treefmt = {
+      projectRootFile = "flake.nix";
 
-    programs = {
-      alejandra.enable = true;
-      deadnix.enable = true;
-      statix.enable = true;
-      taplo.enable = true;
-      mdformat = {
-        enable = true;
-        # GitHub-flavoured Markdown: plain mdformat would mangle tables.
-        plugins = ps: [ps.mdformat-gfm];
+      programs = {
+        alejandra.enable = true;
+        deadnix.enable = true;
+        statix.enable = true;
+        taplo.enable = true;
+        mdformat = {
+          enable = true;
+          # GitHub-flavoured Markdown: plain mdformat would mangle tables.
+          plugins = ps: [ps.mdformat-gfm];
+        };
+        ruff-check.enable = true;
+        ruff-format.enable = true;
       };
-      ruff-check.enable = true;
-      ruff-format.enable = true;
-    };
 
-    # Files without a formatter, and test fixtures that must stay byte
-    # for byte as they are.
-    settings.global.excludes = [
-      "*.lic"
-      ".gitignore"
-      "LICENSES/*"
-      "flake.lock"
-    ];
+      # treefmt-nix has no Tcl formatter of its own.
+      settings.formatter.tclfmt = {
+        command = "${pkgs.tclint}/bin/tclfmt";
+        options = ["--in-place"];
+        includes = ["*.tcl"];
+      };
+
+      # Files without a formatter, and test fixtures that must stay byte
+      # for byte as they are.
+      settings.global.excludes = [
+        "*.golden"
+        "*.lic"
+        ".gitignore"
+        "LICENSES/*"
+        "flake.lock"
+      ];
+    };
   };
 }

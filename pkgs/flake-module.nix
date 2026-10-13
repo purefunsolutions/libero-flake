@@ -8,8 +8,13 @@ let
   ourPackages = final: {
     flexlm-license-rewrite = final.callPackage ./flexlm-license-rewrite/package.nix {};
   };
+
+  # Functions, not packages.
+  ourLibs = final: {
+    mkLiberoProject = final.callPackage ./libero-project {};
+  };
 in {
-  flake.overlays.default = final: _prev: ourPackages final;
+  flake.overlays.default = final: _prev: ourPackages final // ourLibs final;
 
   perSystem = {
     pkgs,
@@ -32,6 +37,9 @@ in {
     # they need the login-gated Microchip downloads.
     checks =
       lib.filterAttrs (_: drv: !drv.meta.unfree) packages
-      // lib.concatMapAttrs testsOf packages;
+      // lib.concatMapAttrs testsOf (packages
+        // {
+          libero-project-example = pkgs.callPackage ./libero-project/tests/example.nix {};
+        });
   };
 }

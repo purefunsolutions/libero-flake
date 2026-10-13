@@ -51,6 +51,21 @@ nix flake check --all-systems --no-update-lock-file &&
   copies the signed FEATURE/INCREMENT lines unchanged, so a license
   server can use the license exactly as Microchip emailed it. Tested on a
   synthetic license under `tests/`; never commit a real license.
+- `pkgs/libero-project`: `mkLiberoProject`, a function in the overlay. It
+  turns HDL and constraints into a bundle:
+  - `hdl/` and `constraints/{io,fp,timing}/`;
+  - `tcl/build.tcl`, the generic flow. Run it from an empty directory; the
+    project goes to `./project` and the programming files to `./export`;
+  - `tcl/family/<family>.tcl`, which provides `export_programming`;
+  - `tcl/params.tcl`, generated, with every value restricted to a safe
+    character set;
+  - test: a dry run with `tests/libero-stub.tcl` stubbing every Libero
+    command. The example project's transcript is compared against
+    `tests/example.golden`; when the flow changes, regenerate it and review
+    the diff;
+  - test: Yosys synthesis. `synth_sf2` maps to CFG LUTs, SLE flip-flops,
+    ARI1 carry chains and IO/clock buffers. It infers no LSRAM, µSRAM or
+    math blocks, and there is no open place and route for these families.
 
 ## Conventions
 
