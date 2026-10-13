@@ -58,6 +58,20 @@ requested programming file was exported. The free license has a single
 seat: runs on one host take turns, and while the seat is in use elsewhere
 the runner retries with backoff.
 
+## Hello FPGA kit
+
+Microchip's M2S-HELLO-FPGA-KIT carries a SmartFusion 2 M2S010-1VFG256 (hard
+Cortex-M3, 12,084 LUT4 logic elements), a 50 MHz oscillator, three LEDs
+and two push buttons on the FPGA, and a PIC32 that programs the FPGA over
+USB. `hello-fpga-blinky` is a Clash counter on the three LEDs; SW1 resets
+it. It runs from the SmartFusion 2's on-chip 50 MHz oscillator, like
+Microchip's demo designs for the kit, instead of the board's oscillator.
+
+```sh
+nix build .#hello-fpga-blinky    # Clash -> Verilog -> Libero bundle
+nix build .#checks.<system>.hello-fpga-blinky-yosys    # LUT and FF usage
+```
+
 ## Programming the Hello FPGA kit
 
 The kit's on-board PIC32 programs the SmartFusion 2 from a DirectC `.dat`

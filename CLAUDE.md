@@ -86,13 +86,54 @@ nix flake check --all-systems --no-update-lock-file &&
   - is tested with `tests/libero-stub.sh` standing in for `libero`, and is
     null until a `libero` package is in scope.
 
+## Hello FPGA kit
+
+Device: SmartFusion 2 M2S010-1VFG256 (Libero: die M2S010, package
+`256 VF`, speed -1, 1.2 V core, COM). Kit schematics:
+<https://ww1.microchip.com/downloads/aemdocuments/documents/fpga/ProductDocuments/UserGuides/hello_fpga_kit_schematics.pdf>
+
+| Signal     | Pin     | Bank (VDDI) | Notes (schematic sheet)                      |
+| ---------- | ------- | ----------- | -------------------------------------------- |
+| CLK_50MHz  | N8      | 4 (3.3 V)   | DSC1001 50 MHz oscillator (4)                |
+| LED1_DEBUG | T12     | 4 (3.3 V)   | LD1, lit when driven low (4, 6)              |
+| LED2_DEBUG | T13     | 4 (3.3 V)   | LD2, lit when driven low (4, 6)              |
+| LED3_DEBUG | G13     | 1 (3.3 V)   | LD3, lit when driven low (4, 6)              |
+| PB1_DEBUG  | K1      | 5 (1.5 V)   | SW1, pulled up, low while pressed (6)        |
+| PB3_DEBUG  | L1      | 5 (1.5 V)   | SW3, pulled up, low while pressed (6)        |
+| FF_SW2     | J2      | 5 (1.5 V)   | SW2, Flash\*Freeze (6)                       |
+| UART_TX/RX | H12/H13 | 1 (3.3 V)   | MMUART_1 pads to the PIC32's UART bridge (4) |
+
+Bank supplies are on sheet 7: banks 1 to 4 and 7 at 3.3 V, banks 0 and 5
+at 1.5 V. LD4 and LD5 belong to the PIC32.
+
+- SmartFusion 2/IGLOO 2 I/O PDC syntax is
+  `set_io <port> -pinname <pin> -fixed yes -iostd <std>`. PolarFire's is
+  different (`-port_name`, `-pin_name`, `-io_std`).
+- Never invent pins, banks or I/O standards: cite the schematic sheet.
+- `hello-fpga-blinky` clocks from the on-chip 25/50 MHz RC oscillator
+  (50 MHz at 1.2 V core, about 1 % accurate), as Microchip's demo designs
+  for the kit do: `RCOSC_25_50MHZ` -> `RCOSC_25_50MHZ_FAB` -> `CLKINT` in
+  `blinky.v`, a Verilog top around the Clash module. The primitives are
+  declared there as black boxes (`syn_black_box` for Synplify, which also
+  keeps Yosys happy), inside `ifdef SYNTHESIS`, which both define:
+  simulations use the SmartFusion 2 library's models of them, and
+  Synplify's netlist has empty stubs of them anyway. The SDC constrains
+  the oscillator's instance pin.
+  The kit's own 50 MHz oscillator X1 (N8) is not used: on one kit it
+  stopped driving its output after most power-ups (the pin floated: a
+  weak pull-down read low, none read high), and never recovered.
+
 ## Conventions
 
 - Every file has SPDX copyright and license comments (`MIT`,
   "2026 Mika Tammi"). Files that can't hold comments are annotated in
   `REUSE.toml`.
 - Every file type has a formatter in `nix/treefmt.nix`, enabled in the
-  commit that adds the first file of that type.
+  commit that adds the first file of that type. Verilog's is verible. On
+  Darwin, nixos-26.05's verible doesn't build (its Bazel dependencies no
+  longer match their hash), so `nix/treefmt.nix` applies nixpkgs master's
+  fix (NixOS/nixpkgs#541557) there. Hydra doesn't build that variant, so
+  Macs compile it once. Drop the override once nixos-26.05 has the fix.
 - Nothing host-specific in the repository: no hostnames, MAC addresses,
   license files or absolute paths of anyone's machine.
 - Checks never depend on the login-gated Microchip downloads. CI and

@@ -14,6 +14,12 @@ let
   ourLibs = final: {
     mkLiberoProject = final.callPackage ./libero-project {};
   };
+
+  # Board designs, mkLiberoProject bundles. Flake outputs only, not part of
+  # the overlay. Where Libero is available, each one's runner is an app.
+  designs = pkgs: {
+    hello-fpga-blinky = pkgs.callPackage ./hello-fpga-blinky/package.nix {};
+  };
 in {
   flake.overlays.default = final: _prev: ourPackages final // ourLibs final;
 
@@ -26,13 +32,25 @@ in {
     # breaking evaluation.
     packages =
       lib.filterAttrs (_: lib.meta.availableOn pkgs.stdenv.hostPlatform)
-      (lib.mapAttrs (name: _: pkgs.${name}) (ourPackages pkgs));
+      (lib.mapAttrs (name: _: pkgs.${name}) (ourPackages pkgs) // designs pkgs);
+
+    runners =
+      lib.filterAttrs (_: runner: runner != null && lib.meta.availableOn pkgs.stdenv.hostPlatform runner)
+      (lib.mapAttrs (_: design: design.runner) (designs pkgs));
 
     testsOf = name: drv:
       lib.mapAttrs' (test: lib.nameValuePair "${name}-${test}")
       (drv.passthru.tests or {});
   in {
     inherit packages;
+
+    apps =
+      lib.mapAttrs (_: runner: {
+        type = "app";
+        program = lib.getExe runner;
+        inherit (runner) meta;
+      })
+      runners;
 
     # Free packages are built by the checks too. Unfree ones are left out:
     # they need the login-gated Microchip downloads.
