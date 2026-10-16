@@ -44,6 +44,32 @@ physical x86_64 machine (VMs are not supported).
 1. At <https://www.microchipdirect.com/fpga-software-products>, choose
    "Request Free License" and register a Silver floating license for that
    MAC address. The license file arrives by email.
+1. Enable the NixOS module, with the license file kept outside the Nix
+   store:
+
+```nix
+{config, lib, ...}: {
+  imports = [libero-flake.nixosModules.libero-license];
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    lib.getName pkg == "libero-license-daemons";
+  services.libero-license = {
+    enable = true;
+    licenseFile = "/etc/nixos/libero-license.dat";
+  };
+  # Open lmgrd and the vendor daemons on one interface only.
+  networking.firewall.interfaces.wg0.allowedTCPPorts =
+    config.services.libero-license.ports;
+}
+```
+
+The service reads the license as a systemd credential, rewrites its SERVER
+line and daemon paths at every start, and pins the vendor daemons to fixed
+ports (1703 to 1705 by default), so the emailed file is used as it is.
+Clients point `LM_LICENSE_FILE` and `SNPSLMD_LICENSE_FILE` at
+`1702@<server>`. lmgrd tells them the host name from the SERVER line,
+which must resolve for them too; if it doesn't, set
+`services.libero-license.hostName` to an IP address they reach the server
+at.
 
 Flakes that use this one can fetch the tarball from elsewhere instead,
 for example from a private mirror, by overriding the package's `src`.
@@ -60,6 +86,8 @@ libero-license-daemons.overrideAttrs (old: {
   };
 })
 ```
+
+On NixOS, set it as `services.libero-license.package`.
 
 ## Designs
 

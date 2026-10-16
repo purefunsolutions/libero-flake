@@ -96,6 +96,22 @@ nix flake check --all-systems --no-update-lock-file &&
   the vendor daemons. Nothing built from them may be published (no public
   binary caches): every user downloads the Microchip files themselves.
 - lmgrd wants `/usr/tmp/.flexlm` for its lock files.
+- lmgrd and the vendor daemons exit with `Not a valid server hostname`
+  unless the SERVER line names their host. An IP address only counts when
+  the host name resolves to it, which on NixOS it doesn't (127.0.0.2).
+  `FLEXLM_ANYHOSTNAME=1` skips the check (verified with 11.19.6).
+- `nixos-modules/libero-license.nix`: `services.libero-license`.
+  - The license is a systemd credential (`LoadCredential`) from
+    `licenseFile`, a `types.externalPath`, so it can never be a store path.
+  - `preStart` runs `flexlm-license-rewrite` into `$RUNTIME_DIRECTORY`;
+    lmgrd runs with `-z` (foreground, logs in the journal) as the static
+    user `libero-license`.
+  - Fully hardened unit, except `PrivateNetwork`: the host ID is a physical
+    NIC's MAC. `/usr/tmp` is linked to `/var/tmp` (tmpfiles), which
+    `PrivateTmp` makes private.
+  - `nixos-modules/tests/libero-license.nix` checks it with stub daemons.
+    The real daemons were run under this unit in a NixOS VM test with a
+    dummy license; that test needs the download, so it is not a check.
 
 ## Hello FPGA kit
 
