@@ -26,6 +26,41 @@ translation, for example in a VM with Rosetta and
 `extra-platforms = x86_64-linux`. On macOS, run them on such a VM or on an
 x86_64-linux host.
 
+## License server
+
+Libero needs a FlexLM license server, even on a single machine: on Linux,
+Microchip only offers floating licenses. The free Silver license covers
+SmartFusion 2 and IGLOO 2 up to 25K logic elements and the smaller
+PolarFire parts. It has one seat, is valid for a year, and is tied to the
+MAC address of the license server, which Microchip expects to be a
+physical x86_64 machine (VMs are not supported).
+
+1. Download the Linux license daemons,
+   `Linux_Licensing_Daemon_11.19.6.0_64-bit.tar.gz`, with a free Microchip
+   account (Daemons tab of Microchip's FPGA licensing page), and add the
+   tarball to the Nix store: `nix-store --add-fixed sha256 <file>`.
+1. On the license server, run `nix run .#lmhostid` and pick the MAC
+   address of a physical network interface.
+1. At <https://www.microchipdirect.com/fpga-software-products>, choose
+   "Request Free License" and register a Silver floating license for that
+   MAC address. The license file arrives by email.
+
+Flakes that use this one can fetch the tarball from elsewhere instead,
+for example from a private mirror, by overriding the package's `src`.
+Nix's built-in fetcher reads `nix.settings.netrc-file`, so the mirror
+can sit behind basic auth; with the same name and hash, the store path
+stays the same. Microchip's files must not be made public.
+
+```nix
+libero-license-daemons.overrideAttrs (old: {
+  src = import <nix/fetchurl.nix> {
+    url = "https://mirror.example.org/${old.src.name}";
+    inherit (old.src) name;
+    hash = old.src.outputHash;
+  };
+})
+```
+
 ## Designs
 
 `mkLiberoProject` (in `overlays.default`) turns HDL and constraints into a

@@ -86,6 +86,17 @@ nix flake check --all-systems --no-update-lock-file &&
   - is tested with `tests/libero-stub.sh` standing in for `libero`, and is
     null until a `libero` package is in scope.
 
+## License server
+
+- `pkgs/libero-license-daemons`: Microchip's FlexLM 11.19 daemons
+  (`requireFile`; the download needs a Microchip account). The binaries
+  use the standard glibc loader, not the LSB one, and are patched with
+  `autoPatchelfHook`; the patched vendor daemons run normally, without
+  tamper complaints. `passthru.daemonDir` and `passthru.daemons` describe
+  the vendor daemons. Nothing built from them may be published (no public
+  binary caches): every user downloads the Microchip files themselves.
+- lmgrd wants `/usr/tmp/.flexlm` for its lock files.
+
 ## Hello FPGA kit
 
 Device: SmartFusion 2 M2S010-1VFG256 (Libero: die M2S010, package

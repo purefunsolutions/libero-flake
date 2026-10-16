@@ -8,6 +8,7 @@ let
   ourPackages = final: {
     flexlm-license-rewrite = final.callPackage ./flexlm-license-rewrite/package.nix {};
     hello-fpga-cli = final.callPackage ./hello-fpga-cli/package.nix {};
+    libero-license-daemons = final.callPackage ./libero-license-daemons/package.nix {};
   };
 
   # Functions, not packages.
@@ -50,7 +51,14 @@ in {
         program = lib.getExe runner;
         inherit (runner) meta;
       })
-      runners;
+      runners
+      // lib.optionalAttrs (packages ? libero-license-daemons) {
+        lmhostid = {
+          type = "app";
+          program = lib.getExe' packages.libero-license-daemons "lmhostid";
+          meta.description = "Print the FlexLM host IDs to request a Libero license for";
+        };
+      };
 
     # Free packages are built by the checks too. Unfree ones are left out:
     # they need the login-gated Microchip downloads.
