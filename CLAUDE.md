@@ -86,6 +86,37 @@ nix flake check --all-systems --no-update-lock-file &&
   - is tested with `tests/libero-stub.sh` standing in for `libero`, and is
     null until a `libero` package is in scope.
 
+## Libero
+
+- `pkgs/libero/sources.nix`: the offline installer (`requireFile`), pinned
+  to the sha256 Microchip publishes.
+- `pkgs/libero/unwrapped.nix`: the zip holds the vendor's Qt installer
+  and one 7z archive per component. The `Libero_SoC` archive is the
+  finished installation tree (it includes FlashPro Express), so it is
+  extracted with `7z`; no installer runs. `adm/verinfo`, which the launch
+  scripts look for, ships in the archive.
+- `pkgs/libero/package.nix`: buildFHSEnv with the 74 system libraries
+  Libero doesn't bundle (from a scan of the ELF dependencies; the binaries
+  use the standard loader, no LSB shim). The launch scripts call
+  `/usr/bin/ls`, look for libX11 in `/usr/lib` and set
+  `LC_ALL=en_US.UTF-8`. Two bundled `libboost_wave` builds want a
+  `libboost_chrono` Microchip doesn't ship; nothing seems to load them.
+- Libero runs headless in batch mode (`libero SCRIPT:x.tcl`), without a
+  display or `QT_QPA_PLATFORM`.
+- Its default tool profiles name Synplify Pro, QuestaSim and Identify by
+  their bare executable names (`synplify_pro`, `vsim`,
+  `identify_debugger`); `Designer/data/install.def` leaves their
+  locations empty. The wrappers put `Synplify_Pro/bin` on `PATH`; the
+  simulators are left out, and Identify (`withIdentify`) is untested and
+  would need the same.
+- A few tools are 32-bit, hence `multiArch`: `Designer/am/exe/zcat`, which
+  `cdlver` runs while generating the programming data, and the FlashPro
+  tools in `Designer/binfp`. Their GUI libraries (Qt 4, Motif) are not in
+  the environment.
+- On distributions the launch script doesn't know, it adds the bundled
+  RHEL `libstdc++` (`Designer/lib64/rhel`) to the library path and prints
+  an unsupported-OS warning.
+
 ## License server
 
 - `pkgs/libero-license-daemons`: Microchip's FlexLM 11.19 daemons

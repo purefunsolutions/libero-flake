@@ -26,6 +26,39 @@ translation, for example in a VM with Rosetta and
 `extra-platforms = x86_64-linux`. On macOS, run them on such a VM or on an
 x86_64-linux host.
 
+## Libero SoC
+
+1. Download "Libero SoC Design Suite Version 2026.1 Full Installer" for
+   Linux (`libero_soc_2026.1_offline_lin.zip`, about 19 GB) from
+   Microchip's FPGA software downloads page; this needs a free Microchip
+   account. Check it against the sha256sum published there.
+1. Add it to the Nix store with `nix-store --add-fixed sha256 <file>`, and
+   keep a copy outside the store.
+1. Build it on the x86_64-linux machine that will run it:
+   `nix build .#libero`. The installation takes about 24 GB; the Identify
+   debugger is left out unless the package is overridden with
+   `withIdentify`.
+
+Flakes that use this one can fetch the installer from elsewhere, for
+example from a private mirror (see the license daemons below). It is the
+`installer` argument of `libero.unwrapped` and of every other package
+built from it, so an overlay after `overlays.default` can replace it:
+
+```nix
+_final: prev: let
+  inherit (prev.libero.unwrapped) src;
+  installer = import <nix/fetchurl.nix> {
+    url = "https://mirror.example.org/${src.name}";
+    inherit (src) name;
+    hash = src.outputHash;
+  };
+in {
+  libero = prev.libero.override {
+    unwrapped = prev.libero.unwrapped.override {inherit installer;};
+  };
+}
+```
+
 ## License server
 
 Libero needs a FlexLM license server, even on a single machine: on Linux,

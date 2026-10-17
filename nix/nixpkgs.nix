@@ -14,6 +14,8 @@
       overlays = [self.overlays.default];
       config.allowUnfreePredicate = pkg:
         builtins.elem (inputs.nixpkgs.lib.getName pkg) [
+          "libero"
+          "libero-unwrapped"
           "libero-license-daemons"
         ];
     };
