@@ -17,6 +17,7 @@
           "libero"
           "libero-unwrapped"
           "libero-license-daemons"
+          "libero-megavault"
         ];
     };
   };

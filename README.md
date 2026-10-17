@@ -39,6 +39,13 @@ x86_64-linux host.
    debugger is left out unless the package is overridden with
    `withIdentify`.
 
+IP cores, such as the clock conditioning circuits with their PLLs, come from
+the same download: `nix build .#libero-megavault` unpacks its MegaVault,
+every core as of the release (5.8 GB). Only designs with IP cores need it,
+and builds never download cores from Microchip's catalog. The cores'
+documentation (about 250 MB) is its `doc` output,
+`nix build .#libero-megavault.doc`.
+
 On NixOS, `nixosModules.libero` installs it for all users and points it
 at a license server (see below):
 
@@ -71,6 +78,7 @@ in {
   libero = prev.libero.override {
     unwrapped = prev.libero.unwrapped.override {inherit installer;};
   };
+  libero-megavault = prev.libero-megavault.override {inherit installer;};
 }
 ```
 

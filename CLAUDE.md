@@ -112,6 +112,16 @@ nix flake check --all-systems --no-update-lock-file &&
   finished installation tree (it includes FlashPro Express), so it is
   extracted with `7z`; no installer runs. `adm/verinfo`, which the launch
   scripts look for, ships in the archive.
+- `pkgs/libero/megavault.nix`: `libero-megavault`, the IP cores from the
+  installer's MegaVault archive, every public core as of the release
+  (5.8 GB). Its `doc` output has the cores' documentation (about
+  250 MB), which the core configurators otherwise link to on the web.
+  `download_core` from Microchip's web catalog failed here, and the vault
+  holds only some versions (FCCC 2.0.100, 2.0.200 and 2.0.201, not the
+  catalog's 2.0.204).
+  Libero unpacks a core's further packages (`pkg/*.zip` into `fs/p<N>f0`,
+  with a marker file `p<N>`) into the vault the first time a design uses
+  the core, so it needs a writable vault.
 - `pkgs/libero/package.nix`: buildFHSEnv with the 74 system libraries
   Libero doesn't bundle (from a scan of the ELF dependencies; the binaries
   use the standard loader, no LSB shim). The launch scripts call

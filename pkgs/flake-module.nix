@@ -12,6 +12,7 @@ let
     hello-fpga-udev-rules = final.callPackage ./hello-fpga-udev-rules/package.nix {};
     libero = final.callPackage ./libero/package.nix {};
     libero-license-daemons = final.callPackage ./libero-license-daemons/package.nix {};
+    libero-megavault = final.callPackage ./libero/megavault.nix {};
   };
 
   # Functions, not packages.
