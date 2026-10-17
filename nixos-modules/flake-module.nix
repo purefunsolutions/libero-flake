@@ -17,9 +17,11 @@
   module = file: {imports = [overlay file];};
 in {
   flake.nixosModules = {
+    hello-fpga = module ./hello-fpga.nix;
     libero = module ./libero.nix;
     libero-license = module ./libero-license.nix;
     default.imports = [
+      self.nixosModules.hello-fpga
       self.nixosModules.libero
       self.nixosModules.libero-license
     ];
@@ -32,6 +34,11 @@ in {
     ...
   }: {
     checks = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      nixos-hello-fpga = pkgs.callPackage ./tests/hello-fpga.nix {
+        inherit (inputs.nixpkgs.lib) nixosSystem;
+        inherit system;
+        module = self.nixosModules.hello-fpga;
+      };
       nixos-libero = pkgs.callPackage ./tests/libero.nix {
         inherit (inputs.nixpkgs.lib) nixosSystem;
         inherit system;

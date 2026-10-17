@@ -57,6 +57,9 @@ nix flake check --all-systems --no-update-lock-file &&
   `73-seat-late.rules`. Checked with `udevadm verify`. On the real kit,
   `udevadm test` with the rules as an `--extra-rules-dir` showed the
   symlink, the tag and the property.
+- `nixos-modules/hello-fpga.nix`: `hardware.hello-fpga` installs them
+  through `services.udev.packages`. `services.udev.extraRules` would land
+  in `99-local.rules`, too late for `uaccess`.
 - `pkgs/flexlm-license-rewrite`: rewrites the user-editable lines of a
   FlexLM license (SERVER host and port, VENDOR/DAEMON path and port) and
   copies the signed FEATURE/INCREMENT lines unchanged, so a license

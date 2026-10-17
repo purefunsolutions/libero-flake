@@ -202,8 +202,16 @@ The kit's serial port, `/dev/ttyACM*`, belongs to the `dialout` group. The
 udev rules in `hello-fpga-udev-rules` give the user logged in at the
 machine access to it, add the name `/dev/hello-fpga`, and keep
 ModemManager from probing it. The kit's USB bridge, an MCP2221A, keeps
-Microchip's generic USB ID, so the rules apply to any MCP2221A. To install
-them:
+Microchip's generic USB ID, so the rules apply to any MCP2221A. On NixOS:
+
+```nix
+{
+  imports = [libero-flake.nixosModules.hello-fpga];
+  hardware.hello-fpga.enable = true;
+}
+```
+
+Elsewhere, install them with
 
 ```sh
 sudo cp "$(nix build --no-link --print-out-paths .#hello-fpga-udev-rules)"/lib/udev/rules.d/70-hello-fpga.rules /etc/udev/rules.d/
