@@ -39,6 +39,21 @@ x86_64-linux host.
    debugger is left out unless the package is overridden with
    `withIdentify`.
 
+On NixOS, `nixosModules.libero` installs it for all users and points it
+at a license server (see below):
+
+```nix
+{lib, ...}: {
+  imports = [libero-flake.nixosModules.libero];
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) ["libero" "libero-unwrapped"];
+  programs.libero = {
+    enable = true;
+    licenseServer = "1702@licenses.example.org";
+  };
+}
+```
+
 Flakes that use this one can fetch the installer from elsewhere, for
 example from a private mirror (see the license daemons below). It is the
 `installer` argument of `libero.unwrapped` and of every other package

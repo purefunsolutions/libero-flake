@@ -17,8 +17,12 @@
   module = file: {imports = [overlay file];};
 in {
   flake.nixosModules = {
+    libero = module ./libero.nix;
     libero-license = module ./libero-license.nix;
-    default.imports = [self.nixosModules.libero-license];
+    default.imports = [
+      self.nixosModules.libero
+      self.nixosModules.libero-license
+    ];
   };
 
   perSystem = {
@@ -28,6 +32,11 @@ in {
     ...
   }: {
     checks = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      nixos-libero = pkgs.callPackage ./tests/libero.nix {
+        inherit (inputs.nixpkgs.lib) nixosSystem;
+        inherit system;
+        module = self.nixosModules.libero;
+      };
       nixos-libero-license = pkgs.callPackage ./tests/libero-license.nix {
         inherit (inputs.nixpkgs.lib) nixosSystem;
         inherit system;
