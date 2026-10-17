@@ -48,5 +48,17 @@ mkLiberoProject {
     '')
   ];
   exports = ["DAT" "STP" "JOB"];
+  cores = [
+    {
+      vlnv = "Actel:SgCore:FCCC:2.0.201";
+      name = "FCCC_C0";
+      params = {
+        GL0_IS_USED = true;
+        GL0_OUT_0_FREQ = 100;
+        PLL_IN_FREQ = "50.000";
+        PLL_IN_SRC = "OSC_50MHZ";
+      };
+    }
+  ];
   liberoCalls = ./example.golden;
 }

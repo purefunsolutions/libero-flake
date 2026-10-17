@@ -153,12 +153,19 @@ the project, runs synthesis, place and route and timing analysis, and
 exports the programming files. Building a bundle needs no Microchip
 software.
 
+A design can also configure IP cores from Libero's catalog, such as a
+clock conditioning circuit that multiplies a clock with its PLL. They come
+from `libero-megavault`: the runner gives Libero a writable copy of its
+vault, and Libero derives the cores' clock constraints, so the design's
+timing constraints need not repeat them.
+
 Each bundle comes with these tests:
 
 - a dry run of its Tcl with every Libero command stubbed out;
 - its runner against a stub Libero;
 - for SmartFusion 2 and IGLOO 2, synthesis with Yosys' `synth_sf2`, which
-  reports LUT, flip-flop and carry usage without a license.
+  reports LUT, flip-flop and carry usage without a license. Designs with
+  IP cores skip it: Libero generates the cores' HDL.
 
 ### Building with Libero
 

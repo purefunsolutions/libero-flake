@@ -4,7 +4,8 @@
 #
 # Runs a mkLiberoProject bundle with Libero, outside the Nix sandbox: the
 # license server is reachable from here, not from a build. Body of a
-# writeShellApplication, which sets BUNDLE, NAME, PROJECT and EXPORTS.
+# writeShellApplication, which sets BUNDLE, NAME, PROJECT, EXPORTS and
+# VAULT (the IP cores, if the design uses any).
 
 usage() {
   cat <<EOF
@@ -94,6 +95,16 @@ cd "$work/run" || exit
 export HOME=$work/home TMPDIR=$work/tmp
 export XDG_CONFIG_HOME=$HOME/.config XDG_CACHE_HOME=$HOME/.cache
 export XDG_DATA_HOME=$HOME/.local/share XDG_STATE_HOME=$HOME/.local/state
+
+# IP cores: Libero unpacks parts of a core into its vault the first time a
+# design uses it, and the vault in the Nix store is read-only. A tree of
+# real directories with symlinks to the store's files is writable, takes a
+# second and no space.
+if [ -n "${VAULT:-}" ]; then
+  cp -rs "$VAULT" "$work/vault"
+  chmod -R u+w "$work/vault"
+  export LIBERO_VAULT=$work/vault
+fi
 
 exec 9>"$lock"
 if ! flock -n 9; then

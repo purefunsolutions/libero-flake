@@ -6,8 +6,12 @@
 # the command line is sourced.
 foreach command {
     build_design_hierarchy
+    change_vault_location
+    create_and_configure_core
+    derive_constraints_sdc
     export_bitstream_file
     export_prog_job
+    generate_component
     import_files
     new_project
     organize_tool_files

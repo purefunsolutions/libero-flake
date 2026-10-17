@@ -16,6 +16,13 @@ for arg; do
   esac
 done
 
+# Designs with IP cores: Libero writes into the vault, so it must be a
+# writable copy of the read-only one.
+if [ -n "${LIBERO_VAULT:-}" ]; then
+  test -f "$LIBERO_VAULT/index.xml"
+  touch "$LIBERO_VAULT/Components/unpacked"
+fi
+
 calls=$(($(cat "$STUB_STATE/calls" 2>/dev/null || echo 0) + 1))
 echo "$calls" >"$STUB_STATE/calls"
 name=$(sed -n 's/^set project(name) {\(.*\)}$/\1/p' "$(dirname "$script")/params.tcl")

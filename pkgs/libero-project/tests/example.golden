@@ -1,9 +1,13 @@
 new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
 import_files -hdl_source @bundle@/hdl/example.v
 import_files -io_pdc @bundle@/constraints/io/example.pdc
 import_files -sdc @bundle@/constraints/timing/example.sdc
 build_design_hierarchy
 set_root -module example::work
+derive_constraints_sdc
 organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
 organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
 organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint

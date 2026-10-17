@@ -79,6 +79,13 @@ nix flake check --all-systems --no-update-lock-file &&
   - `tcl/family/<family>.tcl`, which provides `export_programming`;
   - `tcl/params.tcl`, generated, with every value restricted to a safe
     character set;
+  - IP cores (`cores`), configured with `create_and_configure_core` and
+    `generate_component` right after `new_project`, from the vault at
+    `LIBERO_VAULT`. After `set_root`, `derive_constraints_sdc` writes
+    `constraint/<root>_derived_constraints.sdc` (clocks of oscillators and
+    CCC outputs), which goes wherever the SDC files go. Verified on the
+    kit with a CCC making 200 MHz from the on-chip oscillator: SmartTime
+    analysed the derived clock and met it with 2.9 ns of slack;
   - test: a dry run with `tests/libero-stub.tcl` stubbing every Libero
     command. The example project's transcript is compared against
     `tests/example.golden`; when the flow changes, regenerate it and review
@@ -86,6 +93,8 @@ nix flake check --all-systems --no-update-lock-file &&
   - test: Yosys synthesis. `synth_sf2` maps to CFG LUTs, SLE flip-flops,
     ARI1 carry chains and IO/clock buffers. It infers no LSRAM, µSRAM or
     math blocks, and there is no open place and route for these families.
+    Not for designs with IP cores, whose HDL only Libero generates. Yosys
+    is an experiment here: it never steers a design;
 - `pkgs/libero-project/runner.sh`: `passthru.runner` of every bundle,
   built purely by Nix and run with `nix run`. Libero needs the network for
   its license, so it never runs inside a Nix build (no impure derivations,
@@ -94,6 +103,9 @@ nix flake check --all-systems --no-update-lock-file &&
     output directory unless `--force` (exit 2);
   - runs Libero in a scratch copy of the bundle with its own `HOME` and
     `XDG_*` directories;
+  - gives Libero a writable copy of the IP core vault, made of real
+    directories with symlinks to the store's files (`cp -rs`, then
+    `chmod -R u+w`): Libero writes into the vault, the store is read-only;
   - takes a host-local `flock`, because the free license has one seat;
   - retries with backoff while the seat is busy (FlexLM -4) or the server
     is unreachable (-15, -96, -97). Any other license error exits 4, and

@@ -17,20 +17,29 @@
 #     hdl = [ ./blinky.v ];             # files, or directories of HDL files
 #     ioConstraints = [ ./blinky.pdc ];
 #     timingConstraints = [ ./blinky.sdc ];
+#     cores = [ {                        # IP cores from Libero's catalog
+#       vlnv = "Actel:SgCore:FCCC:2.0.201";
+#       name = "FCCC_C0";                # the module the HDL instantiates
+#       params = { GL0_IS_USED = true; GL0_OUT_0_FREQ = 200; };
+#     } ];
 #   }
 #
 # The bundle holds the HDL, the constraints, and Tcl that creates the
-# project, runs synthesis, place and route and timing analysis, and exports
-# the programming files (tcl/build.tcl). Building it needs no vendor tools;
-# running it needs Libero and a license.
+# project, configures the IP cores, runs synthesis, place and route and
+# timing analysis, and exports the programming files (tcl/build.tcl).
+# Building it needs no vendor tools; running it needs Libero and a license.
+# With IP cores, Libero also derives their clock constraints (CCC outputs,
+# oscillators), so the timing constraints need not repeat them.
 #
 # passthru.runner: `nix run` target that builds the bundle with Libero
 # outside the Nix sandbox, where the license server is reachable (see
-# runner.sh). Null until a `libero` package is in scope.
+# runner.sh). Null until a `libero` package is in scope, and for designs
+# with IP cores until `libero-megavault` is too.
 #
 # passthru.tests: a dry run of the Tcl with every Libero command stubbed
 # (compared against `liberoCalls` if given), the runner against a stub
-# libero, and Yosys synthesis for the families Yosys supports.
+# libero, and Yosys synthesis for the families Yosys supports, for designs
+# without IP cores.
 {
   lib,
   runCommand,
@@ -43,6 +52,7 @@
   tcl,
   yosys,
   libero ? null,
+  libero-megavault ? null,
 }: {
   pname,
   version ? "0",
@@ -56,6 +66,10 @@
   # DAT, STP, JOB (see tcl/family/*.tcl)
   exports ? ["DAT" "STP"],
   programmingComponents ? ["FABRIC"],
+  # IP cores: { vlnv, name, params }, params being the core's configuration
+  # (strings, integers or booleans) as Libero's create_and_configure_core
+  # takes them. They come from libero-megavault, never downloaded.
+  cores ? [],
   # Expected output of the dry run, for golden tests.
   liberoCalls ? null,
 }: let
@@ -76,6 +90,29 @@
     if builtins.match "[A-Za-z0-9_.:+ -]+" value != null
     then value
     else throw "mkLiberoProject: unsupported characters in ${what}: '${value}'";
+  # The same without spaces, for the elements of Tcl lists.
+  safeWord = what: value:
+    if builtins.match "[A-Za-z0-9_.:+-]+" value != null
+    then value
+    else throw "mkLiberoProject: unsupported characters in ${what}: '${value}'";
+
+  # Each core as a Tcl list: vlnv, component name, and its KEY:VALUE
+  # parameters.
+  coreParam = name: key: value:
+    safeWord "parameter ${key} of core ${name}" "${key}:${
+      if builtins.isBool value
+      then lib.boolToString value
+      else toString value
+    }";
+  coresTcl =
+    lib.concatMapStringsSep " " (core: "{${
+      lib.concatStringsSep " " [
+        (safeWord "core vlnv" core.vlnv)
+        (safeWord "core name" core.name)
+        "{${toString (lib.mapAttrsToList (coreParam core.name) (core.params or {}))}}"
+      ]
+    }}")
+    cores;
 
   # Interpolated, not passed to toString: that copies a path to the store
   # and makes the bundle depend on it, so remote builders get it too.
@@ -103,15 +140,23 @@
       passthru = {
         inherit device top mkRunner;
         runner =
-          if libero == null
+          if libero == null || (cores != [] && libero-megavault == null)
           then null
-          else mkRunner {liberoPackage = libero;};
+          else
+            mkRunner {
+              liberoPackage = libero;
+              vault =
+                if cores == []
+                then null
+                else libero-megavault.vault;
+            };
         tests =
           {
             libero-calls = dryRun;
             runner = runnerTest;
           }
-          // lib.optionalAttrs (yosysSynth ? ${device.family} && hdlLanguage == "VERILOG") {
+          # Not with IP cores: Libero generates their HDL, Yosys never sees it.
+          // lib.optionalAttrs (yosysSynth ? ${device.family} && hdlLanguage == "VERILOG" && cores == []) {
             yosys = synth;
           };
       };
@@ -173,6 +218,7 @@
         echo "set files(io_pdc) {$(list constraints/io)}"
         echo "set files(fp_pdc) {$(list constraints/fp)}"
         echo "set files(sdc) {$(list constraints/timing)}"
+        echo ${lib.escapeShellArg "set cores {${coresTcl}}"}
       } >$out/tcl/params.tcl
     '';
 
@@ -184,16 +230,19 @@
     } ''
       mkdir work
       cd work
-      tclsh ${./tests/libero-stub.tcl} ${bundle}/tcl/build.tcl >calls.log
+      LIBERO_VAULT=/vault tclsh ${./tests/libero-stub.tcl} ${bundle}/tcl/build.tcl >calls.log
       sed -e "s|${bundle}|@bundle@|g" -e "s|$(pwd -P)|@work@|g" calls.log >$out
       ${lib.optionalString (liberoCalls != null) ''
         diff -u ${liberoCalls} $out
       ''}
     '';
 
-  # The runner takes the libero package as an argument, so the test can
-  # use a stub.
-  mkRunner = {liberoPackage}:
+  # The runner takes the libero package and the IP core vault as arguments,
+  # so the test can use stubs.
+  mkRunner = {
+    liberoPackage,
+    vault ? null,
+  }:
     writeShellApplication {
       name = pname;
       runtimeInputs = [liberoPackage coreutils findutils flock gnugrep];
@@ -202,6 +251,10 @@
         NAME = pname;
         PROJECT = params."project(name)";
         EXPORTS = toString exports;
+        VAULT =
+          if vault == null
+          then ""
+          else "${vault}";
       };
       text = builtins.readFile ./runner.sh;
       meta = {
@@ -216,8 +269,20 @@
     text = builtins.readFile ./tests/libero-stub.sh;
   };
 
+  # A vault with nothing but its index, read-only like libero-megavault's.
+  stubVault = runCommand "${pname}-stub-vault" {} ''
+    mkdir -p $out/Components
+    echo '<repositoryIndex/>' >$out/index.xml
+  '';
+
   runnerTest = runCommand "${pname}-runner-test" {} ''
-    run=${lib.getExe (mkRunner {liberoPackage = stubLibero;})}
+    run=${lib.getExe (mkRunner {
+      liberoPackage = stubLibero;
+      vault =
+        if cores == []
+        then null
+        else stubVault;
+    })}
     export STUB_STATE=$PWD/state XDG_RUNTIME_DIR=$PWD LIBERO_RETRY_DELAY=0
     mkdir state
 
