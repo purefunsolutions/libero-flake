@@ -223,6 +223,13 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   The kit's own 50 MHz oscillator X1 (N8) is not used: on one kit it
   stopped driving its output after most power-ups (the pin floated: a
   weak pull-down read low, none read high), and never recovered.
+- `hello-fpga-blinky-pll`: the counter at 400 MHz (31 bits, LEDs on bits
+  28 to 30, same blink rate), clocked by `FCCC_C0`, a CCC configured
+  through `cores`: VCO 800 MHz from the on-chip oscillator, divided by 2.
+  The clocks come from Libero's derived constraints; the design has no
+  SDC. Verified on the kit: SmartTime met 400 MHz with 0.405 ns of setup
+  slack at the worst corner, and the webcam measured LED1 toggling every
+  0.670 s (0.671 s expected).
 
 ## Conventions
 

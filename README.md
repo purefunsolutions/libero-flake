@@ -193,6 +193,11 @@ USB. `hello-fpga-blinky` is a Clash counter on the three LEDs; SW1 resets
 it. It runs from the SmartFusion 2's on-chip 50 MHz oscillator, like
 Microchip's demo designs for the kit, instead of the board's oscillator.
 
+`hello-fpga-blinky-pll` is the same counter at 400 MHz, the most a clock
+conditioning circuit (CCC) puts out: the CCC's PLL multiplies the on-chip
+oscillator, and Libero derives the clock constraints. It is the example of
+a design with IP cores.
+
 ```sh
 nix build .#hello-fpga-blinky    # Clash -> Verilog -> Libero bundle
 nix build .#checks.<system>.hello-fpga-blinky-yosys    # LUT and FF usage

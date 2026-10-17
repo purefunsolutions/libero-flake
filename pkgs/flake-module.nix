@@ -24,6 +24,7 @@ let
   # the overlay. Where Libero is available, each one's runner is an app.
   designs = pkgs: {
     hello-fpga-blinky = pkgs.callPackage ./hello-fpga-blinky/package.nix {};
+    hello-fpga-blinky-pll = pkgs.callPackage ./hello-fpga-blinky-pll/package.nix {};
   };
 in {
   flake.overlays.default = final: _prev: ourPackages final // ourLibs final;
