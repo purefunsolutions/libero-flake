@@ -49,6 +49,14 @@ nix flake check --all-systems --no-update-lock-file &&
 - `pkgs/hello-fpga-cli`: host CLI for the Hello FPGA kit's PIC32
   programmer (DirectC `.dat` files over the kit's USB serial port). Upstream
   has no license, so the package has no `meta.license`.
+- `pkgs/hello-fpga-udev-rules`: udev rules for the kit's MCP2221A USB
+  bridge (04d8:00dd, Microchip's default ID and descriptors, no serial
+  number, so they match any MCP2221A): ModemManager ignores it (its AT
+  probing would upset the PIC32's stateful protocol), `uaccess`, and
+  `/dev/hello-fpga`. Numbered 70 because `uaccess` only works before
+  `73-seat-late.rules`. Checked with `udevadm verify`. On the real kit,
+  `udevadm test` with the rules as an `--extra-rules-dir` showed the
+  symlink, the tag and the property.
 - `pkgs/flexlm-license-rewrite`: rewrites the user-editable lines of a
   FlexLM license (SERVER host and port, VENDOR/DAEMON path and port) and
   copies the signed FEATURE/INCREMENT lines unchanged, so a license

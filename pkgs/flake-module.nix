@@ -8,6 +8,7 @@ let
   ourPackages = final: {
     flexlm-license-rewrite = final.callPackage ./flexlm-license-rewrite/package.nix {};
     hello-fpga-cli = final.callPackage ./hello-fpga-cli/package.nix {};
+    hello-fpga-udev-rules = final.callPackage ./hello-fpga-udev-rules/package.nix {};
     libero = final.callPackage ./libero/package.nix {};
     libero-license-daemons = final.callPackage ./libero-license-daemons/package.nix {};
   };
