@@ -187,14 +187,20 @@ nix build .#checks.<system>.hello-fpga-blinky-yosys    # LUT and FF usage
 
 The kit's on-board PIC32 programs the SmartFusion 2 from a DirectC `.dat`
 file sent over the kit's USB serial port; no FlashPro is needed.
-`hello-fpga-cli` drives it, on Linux and on macOS:
+`flash-hello-fpga` finds the kit by its USB ID and programs it, on Linux
+and on macOS:
 
 ```sh
-nix run .#hello-fpga-cli -- program design.dat --port /dev/ttyACM0
+nix run .#hello-fpga-blinky    # Libero, see above: out/hello-fpga-blinky/
+nix run .#flash-hello-fpga     # programs the only .dat in out/*/
 ```
 
-It is packaged from [captndo/hello-fpga-cli][hello-fpga-cli], which has no
-license yet.
+Give it a `.dat` file or a directory with one, and `--port` when more than
+one MCP2221A is attached. It runs `hello-fpga program` from
+`hello-fpga-cli`, which can also verify and erase the FPGA, read its core
+power and bridge its UART (`nix run .#hello-fpga-cli -- --help`).
+`hello-fpga-cli` is packaged from [captndo/hello-fpga-cli][hello-fpga-cli],
+which has no license yet.
 
 ### Serial port access on Linux
 

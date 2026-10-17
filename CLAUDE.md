@@ -60,6 +60,12 @@ nix flake check --all-systems --no-update-lock-file &&
 - `nixos-modules/hello-fpga.nix`: `hardware.hello-fpga` installs them
   through `services.udev.packages`. `services.udev.extraRules` would land
   in `99-local.rules`, too late for `uaccess`.
+- `pkgs/flash-hello-fpga`: wraps `hello-fpga program`. It finds the kit's
+  port by USB ID with pyserial, on Linux and macOS alike, and the `.dat`
+  file: the argument, the only one in a directory, or the only one in
+  `./out/*/`, where the runners put theirs. Its test covers the `.dat`
+  search and the `hello-fpga` call with a stub; finding the port needs a
+  kit and was tested by hand.
 - `pkgs/flexlm-license-rewrite`: rewrites the user-editable lines of a
   FlexLM license (SERVER host and port, VENDOR/DAEMON path and port) and
   copies the signed FEATURE/INCREMENT lines unchanged, so a license
