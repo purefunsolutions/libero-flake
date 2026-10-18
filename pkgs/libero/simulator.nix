@@ -5,7 +5,8 @@
 # or ModelSim in their Microchip editions, extracted from the offline
 # installer on its own: designs that never simulate don't need it. The
 # Libero license covers both, through its Siemens vendor daemons (saltd,
-# mgcld). They run inside libero's FHS environment.
+# mgcld). They run inside libero's FHS environment:
+# `libero.override { simulators = [ ... ]; }`.
 # Output: $out/opt/microchip/Libero_SoC/<dir>.
 {
   lib,

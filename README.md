@@ -42,7 +42,8 @@ x86_64-linux host.
 The HDL simulators come from the same download, as packages of their own:
 `libero-questasim`, QuestaSim ME, Libero's default simulator (7.2 GB),
 and `libero-modelsim`, ModelSim ME Pro (0.75 GB). The license covers
-both.
+both. Libero finds them with
+`libero.override { simulators = [libero-questasim libero-modelsim]; }`.
 
 IP cores, such as the clock conditioning circuits with their PLLs, come from
 the same download: `nix build .#libero-megavault` unpacks its MegaVault,

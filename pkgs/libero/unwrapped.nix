@@ -14,9 +14,9 @@
   unzip,
   p7zip,
   installer ? (callPackage ./sources.nix {}).installer,
-  # The QuestaSim and ModelSim simulators (8.4 GB) are left out, and the
-  # Identify debugger (3 GB) unless asked for; synthesis, place and route
-  # and FlashPro Express don't need them.
+  # The Identify debugger (3 GB) is left out unless asked for; synthesis,
+  # place and route and FlashPro Express don't need it. The simulators are
+  # packages of their own (simulator.nix).
   withIdentify ? false,
 }: let
   sources = callPackage ./sources.nix {};
