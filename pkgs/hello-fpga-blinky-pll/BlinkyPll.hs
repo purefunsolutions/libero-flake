@@ -3,6 +3,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 -- | The blinky at 400 MHz, the most a SmartFusion 2 clock conditioning
@@ -11,6 +12,7 @@
 -- and the CCC, whose PLL makes 400 MHz of its 50 MHz.
 module BlinkyPll where
 
+import Clash.Explicit.Testbench
 import Clash.Prelude
 
 -- | The CCC's GL0 output. SW1 pulls its input low while pressed, so it
@@ -43,3 +45,18 @@ leds = fmap (\c -> (complement (c ! 28), complement (c ! 29), complement (c ! 30
       }
   )
   #-}
+
+-- | The testbench of the core, which Clash generates as Verilog (the
+-- runner's --simulate; before synthesis only, the netlists have no core).
+-- SW1 is pressed for the first cycles; from its release on, a counter of
+-- the testbench's own predicts the LEDs, compared every cycle, until LED1
+-- lights at cycle 2^28. That is 0.67 s of simulated time.
+testBench :: Signal Dom400 Bool
+testBench = done
+  where
+    clk = tbClockGen (not <$> done)
+    rst = resetGenN (SNat @8)
+    cycles = withClockResetEnable clk rst enableGen (register (0 :: Unsigned 32) (cycles + 1))
+    expected = (\c -> (complement (c ! 28), complement (c ! 29), complement (c ! 30))) <$> cycles
+    done = assert clk rst "LEDs" (topEntity clk rst) expected ((== bit 28 + 4) <$> cycles)
+{-# ANN testBench (TestBench 'topEntity) #-}

@@ -291,6 +291,13 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   SDC. Verified on the kit: SmartTime met 400 MHz with 0.405 ns of setup
   slack at the worst corner, and the webcam measured LED1 toggling every
   0.670 s (0.671 s expected).
+- Its testbench is Clash's, of the core: `testBench` in `BlinkyPll.hs`,
+  annotated `TestBench 'topEntity`, from the Verilog build's second
+  output. `assert` compares the LEDs with a counter of its own every
+  cycle, until LED1 lights at cycle 2^28: 5.5 min with QuestaSim, 3.3
+  with ModelSim (27 min with a VCD of its own signals, 24 GB). Clash's
+  `$finish(0)` prints nothing. Before synthesis only: Synplify keeps the
+  core as a module but renames its ports (`counter_i`, `clk`, `SW1_c`).
 
 ## Conventions
 

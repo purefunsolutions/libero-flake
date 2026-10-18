@@ -5,7 +5,8 @@
 # cores: a clock conditioning circuit (CCC) multiplies the on-chip 50 MHz
 # oscillator to its 400 MHz maximum, and Libero derives the clock
 # constraints. Clash -> Verilog -> Libero bundle; blinky_pll.v wraps the
-# Clash module with the oscillator and the CCC.
+# Clash module with the oscillator and the CCC. The testbench, of the
+# Clash module, is written in Clash too: the example of that.
 {
   runCommand,
   haskellPackages,
@@ -16,15 +17,18 @@
     ps.clash-prelude
   ]);
 
+  # The core, and its testbench in the second output.
   verilog =
     runCommand "hello-fpga-blinky-pll-verilog" {
       nativeBuildInputs = [clash];
+      outputs = ["out" "testbench"];
     } ''
       export HOME=$TMPDIR
       cp ${./BlinkyPll.hs} BlinkyPll.hs
       clash --verilog BlinkyPll.hs
-      mkdir $out
+      mkdir $out $testbench
       cp verilog/BlinkyPll.topEntity/*.v $out/
+      cp verilog/BlinkyPll.testBench/*.v $testbench/
     '';
 in
   mkLiberoProject {
@@ -58,6 +62,15 @@ in
           GPD0_IS_USED = false;
           GPD1_IS_USED = false;
         };
+      }
+    ];
+    # Clash's testbench of the core (BlinkyPll.hs). Before synthesis only:
+    # the synthesized core has other ports.
+    testbenches = [
+      {
+        name = "core";
+        hdl = [verilog.testbench];
+        top = "testBench";
       }
     ];
   }

@@ -252,7 +252,12 @@ checks that LED1 lights 2^25 oscillator periods later, 0.67 s: the carry
 out of the counter's 25 lower bits. It runs at every stage: QuestaSim
 takes about a minute before synthesis, 8 minutes after it and half an
 hour with the routed timing; ModelSim, which Libero runs without
-QuestaSim's `+acc`, takes 45 s, 6 and 14 minutes.
+QuestaSim's `+acc`, takes 45 s, 6 and 14 minutes. `hello-fpga-blinky-pll`'s
+testbench is written in Clash (`testBench` in `BlinkyPll.hs`): a counter
+of its own predicts the core's LEDs, compared every cycle until LED1
+lights at cycle 2^28: five and a half minutes with QuestaSim, three with
+ModelSim. It runs before synthesis only: the synthesized core has other
+ports.
 
 ```sh
 nix build .#hello-fpga-blinky    # Clash -> Verilog -> Libero bundle
