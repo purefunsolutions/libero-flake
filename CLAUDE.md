@@ -284,6 +284,9 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   corner's SDF (`-sdfmax`) 671089649.6 ns, 9.6 ns of clock and output
   delay (29 min, 14 min). A `$fatal` watchdog ends it if LED1 never
   lights; the oscillator never stops.
+- Testbench `core`: Clash's, of the core (`testBench` in `Blinky.hs`, as
+  in `hello-fpga-blinky-pll`), until LED1 lights at cycle 2^25: 42 s with
+  QuestaSim, 25 s with ModelSim, before synthesis only.
 - `hello-fpga-blinky-pll`: the counter at 400 MHz (31 bits, LEDs on bits
   28 to 30, same blink rate), clocked by `FCCC_C0`, a CCC configured
   through `cores`: VCO 800 MHz from the on-chip oscillator, divided by 2.

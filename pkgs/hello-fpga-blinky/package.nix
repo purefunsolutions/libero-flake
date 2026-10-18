@@ -3,7 +3,8 @@
 #
 # Clash blinky for the Microchip Hello FPGA kit (SmartFusion 2
 # M2S010-1VFG256): Clash -> Verilog -> Libero bundle. blinky.v wraps the
-# Clash module with the on-chip oscillator; blinky_tb.v is the testbench.
+# Clash module with the on-chip oscillator. Its testbenches: blinky_tb.v,
+# of the whole chip, and one of the Clash module, written in Clash.
 {
   runCommand,
   haskellPackages,
@@ -14,15 +15,18 @@
     ps.clash-prelude
   ]);
 
+  # The core, and its testbench in the second output.
   verilog =
     runCommand "hello-fpga-blinky-verilog" {
       nativeBuildInputs = [clash];
+      outputs = ["out" "testbench"];
     } ''
       export HOME=$TMPDIR
       cp ${./Blinky.hs} Blinky.hs
       clash --verilog Blinky.hs
-      mkdir $out
+      mkdir $out $testbench
       cp verilog/Blinky.topEntity/*.v $out/
+      cp verilog/Blinky.testBench/*.v $testbench/
     '';
 in
   mkLiberoProject {
@@ -42,11 +46,18 @@ in
     ioConstraints = [./blinky.pdc];
     timingConstraints = [./blinky.sdc];
     testbenches = [
+      # The whole chip, at every stage: blinky_tb.v.
       {
         name = "chip";
         hdl = [./blinky_tb.v];
         top = "blinky_tb";
         instance = "dut";
+      }
+      # Clash's testbench of the core (Blinky.hs), before synthesis only.
+      {
+        name = "core";
+        hdl = [verilog.testbench];
+        top = "testBench";
       }
     ];
   }
