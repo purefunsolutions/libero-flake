@@ -86,10 +86,34 @@ nix flake check --all-systems --no-update-lock-file &&
     CCC outputs), which goes wherever the SDC files go. Verified on the
     kit with a CCC making 200 MHz from the on-chip oscillator: SmartTime
     analysed the derived clock and met it with 2.9 ns of slack;
+  - testbenches (`testbenches`: a list of `{ name, hdl, top, ... }`, the
+    first the runner's default; files in `testbench/<name>/`). When
+    `LIBERO_SIMULATE` names a stage, only the one `LIBERO_TESTBENCH`
+    names is imported, as stimulus, so testbenches may share file and
+    module names (Clash's are all `testBench`). `simulate` adds a
+    simulation tool profile for the runner's simulator (`add_profile`)
+    and runs `SIM_PRESYNTH`, `SIM_POSTSYNTH` or `SIM_POSTLAYOUT`; Libero
+    runs synthesis and place and route first by itself. Running a script,
+    Libero runs simulators in batch mode even with `-batch FALSE`; for the
+    GUI it simulates for `0ns` (compile and load), and `gui_do` turns its
+    `run.do` into `gui.do` (`-onfinish stop`, the testbench's waves, its
+    time, no `onerror`/`onbreak`/`exit`), which the runner runs with
+    `vsim -gui` in Libero's FHS environment (`LIBERO_FHS`). The generated
+    `run.do` compiles with `vlog -sv` (so `$error` works in `.v` files),
+    loads `-L SmartFusion2` before the design's library (library models
+    beat the design's black-box stubs) and runs `-sim_runtime`, `-all`
+    until `$finish`. Libero's VCD option dumps the whole design (8.8 GB
+    and 10 minutes for the blinky's 1.3 s), and its batch do file ignores
+    "included" do files, so `vcd.do` (the testbench's own signals, or
+    `-r /*`) goes in as `vsim -do vcd.do` through `-add_vsim_options`, and
+    only on request: Clash's testbench of the PLL core has its clock and
+    cycle counter as its own signals, 24 GB for 0.67 s; 32-bit ModelSim
+    fails near 2 GiB;
   - test: a dry run with `tests/libero-stub.tcl` stubbing every Libero
-    command. The example project's transcript is compared against
-    `tests/example.golden`; when the flow changes, regenerate it and review
-    the diff;
+    command: building, each testbench before synthesis, and the first at
+    the other stages. The example project's transcript (two testbenches)
+    is compared against `tests/example.golden`; when the flow changes,
+    regenerate it and review the diff;
   - test: Yosys synthesis. `synth_sf2` maps to CFG LUTs, SLE flip-flops,
     ARI1 carry chains and IO/clock buffers. It infers no LSRAM, µSRAM or
     math blocks, and there is no open place and route for these families.
@@ -112,6 +136,18 @@ nix flake check --all-systems --no-update-lock-file &&
     a build failure exits 1. Both keep the work directory;
   - moves the exports, reports, logs and `manifest.txt` into place
     atomically, and only after every format in `exports` was written;
+  - with `--simulate[=STAGE]` (`--testbench`, `--simulator`, `--gui`,
+    `--vcd`, `--vcd-all`) simulates instead, into
+    `out/<design>-<testbench>-<stage>-<simulator>`, with the simulators of
+    `mkLiberoProject`'s scope (only for designs with testbenches, which
+    then pull in both). It sets `SALT_LICENSE_SERVER` from
+    `LM_LICENSE_FILE`, and for the GUI keeps `XAUTHORITY` across its own
+    `HOME`. It keeps the outputs (simulator log
+    `<testbench>_<stage>_simulation.log`, VCD, do files; Libero's log if
+    it wrote one) of failing testbenches too, and exits 5 for them:
+    `** Error`/`** Fatal` in the log, or Clash's Verilog `outputVerifier`
+    line (`$display` and `$finish`, which the simulator doesn't count; its
+    VHDL uses `assert`);
   - is tested with `tests/libero-stub.sh` standing in for `libero`, and is
     null until a `libero` package is in scope.
 

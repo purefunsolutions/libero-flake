@@ -42,7 +42,8 @@ x86_64-linux host.
 The HDL simulators come from the same download, as packages of their own:
 `libero-questasim`, QuestaSim ME, Libero's default simulator (7.2 GB),
 and `libero-modelsim`, ModelSim ME Pro (0.75 GB). The license covers
-both. Libero finds them with
+both. The runners use them to simulate designs (see Simulating below);
+Libero's own GUI finds them with
 `libero.override { simulators = [libero-questasim libero-modelsim]; }`.
 
 IP cores, such as the clock conditioning circuits with their PLLs, come from
@@ -169,7 +170,8 @@ timing constraints need not repeat them.
 
 Each bundle comes with these tests:
 
-- a dry run of its Tcl with every Libero command stubbed out;
+- a dry run of its Tcl with every Libero command stubbed out, building
+  and, with a testbench, simulating;
 - its runner against a stub Libero;
 - for SmartFusion 2 and IGLOO 2, synthesis with Yosys' `synth_sf2`, which
   reports LUT, flip-flop and carry usage without a license. Designs with
@@ -191,6 +193,45 @@ logs to the output directory (default `./out/<design>`) only when every
 requested programming file was exported. The free license has a single
 seat: runs on one host take turns, and while the seat is in use elsewhere
 the runner retries with backoff.
+
+### Simulating
+
+A design's testbenches (`testbenches` in `mkLiberoProject`) are simulated
+by the same runner: before synthesis, after it, or after place and route
+with the routed timing. `--testbench` picks one by its name; the first is
+the default.
+
+```sh
+nix run .#<design> -- --simulate                  # before synthesis, QuestaSim
+nix run .#<design> -- --simulate=postsynth        # the synthesized netlist
+nix run .#<design> -- --simulate=postlayout       # the routed netlist and its timing
+nix run .#<design> -- --simulate --testbench <name>
+nix run .#<design> -- --simulate --simulator modelsim
+nix run .#<design> -- --simulate --vcd            # a VCD of the testbench's signals
+nix run .#<design> -- --simulate --gui            # the simulator's GUI
+```
+
+Libero compiles the design with Microchip's simulation libraries, after
+synthesizing, placing and routing it as far as the stage needs, and runs
+the simulator. The runner writes the simulator's log and Libero's logs to
+`./out/<design>-<testbench>-<stage>-<simulator>`, and exits with status 5
+if the testbench failed: `$error` or `$fatal`, a VHDL assertion of
+severity error or failure, or a mismatch of Clash's `outputVerifier`.
+Testbenches are written by hand in (System)Verilog or VHDL, or generated
+by Clash.
+
+A VCD, with `--vcd` of the testbench's own signals or with `--vcd-all` of
+every signal of the design, grows with the simulated time: a testbench
+with a clock of its own, as Clash's have, makes gigabytes per simulated
+second, and ModelSim, a 32-bit program, can't write more than 2 GiB.
+GTKWave or Surfer show VCDs on any system.
+
+With `--gui`, the testbench runs in the simulator's GUI, with its signals
+in the wave window. It stops at the testbench's end and the GUI stays
+open; quitting it ends the run, which is then judged by the GUI's log.
+That needs an X display: over SSH, `ssh -X` (XQuartz on macOS). The
+simulators find the license server through `SALT_LICENSE_SERVER`, which
+defaults to `LM_LICENSE_FILE`.
 
 ## Hello FPGA kit
 
