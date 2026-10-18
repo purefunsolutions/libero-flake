@@ -134,6 +134,13 @@ nix flake check --all-systems --no-update-lock-file &&
   Libero unpacks a core's further packages (`pkg/*.zip` into `fs/p<N>f0`,
   with a marker file `p<N>`) into the vault the first time a design uses
   the core, so it needs a writable vault.
+- `pkgs/libero/simulator.nix`: `libero-questasim` (QuestaSim ME 2025.3,
+  64-bit, 7.2 GB), extracted on its own from the `Libero_SoC` archive in
+  a couple of minutes. It reads its license only from
+  `SALT_LICENSE_SERVER` (features `Microchipqsim*`, served by both saltd
+  and mgcld, one seat). Its `bin/` are links to `vco`, which picks
+  `linux_x86_64/`. `passthru.bin`, `passthru.profileTool` (Libero's name:
+  "QuestaSim ME").
 - `pkgs/libero/package.nix`: buildFHSEnv with the 74 system libraries
   Libero doesn't bundle (from a scan of the ELF dependencies; the binaries
   use the standard loader, no LSB shim). The launch scripts call

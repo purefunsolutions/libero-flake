@@ -39,6 +39,10 @@ x86_64-linux host.
    debugger is left out unless the package is overridden with
    `withIdentify`.
 
+The HDL simulator comes from the same download, as a package of its own:
+`libero-questasim`, QuestaSim ME, Libero's default simulator (7.2 GB),
+which the license covers.
+
 IP cores, such as the clock conditioning circuits with their PLLs, come from
 the same download: `nix build .#libero-megavault` unpacks its MegaVault,
 every core as of the release (5.8 GB). Only designs with IP cores need it,
@@ -79,6 +83,7 @@ in {
     unwrapped = prev.libero.unwrapped.override {inherit installer;};
   };
   libero-megavault = prev.libero-megavault.override {inherit installer;};
+  libero-questasim = prev.libero-questasim.override {inherit installer;};
 }
 ```
 
