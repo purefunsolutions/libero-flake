@@ -14,8 +14,8 @@ path = "**/*.golden"
 SPDX-FileCopyrightText = "2026 Mika Tammi"
 SPDX-License-Identifier = "MIT"
 
-# Screenshots for the README. The window in them is Siemens' QuestaSim,
-# running this project's testbenches.
+# Screenshots for the README. The windows in them are Siemens' QuestaSim
+# and ModelSim, running this project's testbenches.
 [[annotations]]
 path = "docs/*.png"
 SPDX-FileCopyrightText = "2026 Mika Tammi"

@@ -233,11 +233,14 @@ That needs an X display: over SSH, `ssh -X` (XQuartz on macOS). The
 simulators find the license server through `SALT_LICENSE_SERVER`, which
 defaults to `LM_LICENSE_FILE`.
 
-`hello-fpga-blinky`'s testbench `chip` in QuestaSim's GUI, zoomed in on its
-end: LED1 lights (goes low) at 671,089,640 ns, and goes dark when the
-testbench presses SW1 100 ns later.
+`hello-fpga-blinky`'s testbench `chip` in QuestaSim's GUI, and below in
+ModelSim's (`--simulator modelsim`), zoomed in on its end: LED1 lights
+(goes low) at 671,089,640 ns, and goes dark when the testbench presses
+SW1 100 ns later.
 
 ![QuestaSim's wave window with SW1 and LED1 to LED3](docs/questasim-gui-wave-zoom.png)
+
+![ModelSim's wave window with SW1 and LED1 to LED3](docs/modelsim-gui-wave-zoom.png)
 
 ## Hello FPGA kit
 

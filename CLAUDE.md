@@ -38,8 +38,8 @@ nix flake check --all-systems --no-update-lock-file &&
 
 - `flake.nix`: flake-parts, systems x86_64-linux, aarch64-linux and
   aarch64-darwin.
-- `docs/`: screenshots for the README (QuestaSim's GUI under Sway, taken
-  with `grim`). Run `nix run .#optimize-screenshots -- docs/<new>.png` on
+- `docs/`: screenshots for the README (QuestaSim's and ModelSim's GUIs
+  under Sway, taken with `grim`). Run `nix run .#optimize-screenshots -- docs/<new>.png` on
   new ones before committing them: GUI screenshots lose two thirds of their
   size to 256 colours without dithering (PSNR 50 dB and more, nothing to
   see) and oxipng with Zopfli. More Zopfli iterations don't pay: 255 took
