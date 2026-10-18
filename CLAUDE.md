@@ -38,6 +38,12 @@ nix flake check --all-systems --no-update-lock-file &&
 
 - `flake.nix`: flake-parts, systems x86_64-linux, aarch64-linux and
   aarch64-darwin.
+- `docs/`: screenshots for the README (QuestaSim's GUI under Sway, taken
+  with `grim`). Run `nix run .#optimize-screenshots -- docs/<new>.png` on
+  new ones before committing them: GUI screenshots lose two thirds of their
+  size to 256 colours without dithering (PSNR 50 dB and more, nothing to
+  see) and oxipng with Zopfli. More Zopfli iterations don't pay: 255 took
+  8 minutes per image for 0.2 % less than the default 15 in 15 s.
 - `nix/`: flake-parts modules. `treefmt.nix` (formatters, `checks.treefmt`),
   `checks.nix` (`reuse lint`) and `nixpkgs.nix` (the `pkgs` every perSystem
   module sees: nixpkgs plus our overlay).
@@ -313,11 +319,12 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   "2026 Mika Tammi"). Files that can't hold comments are annotated in
   `REUSE.toml`.
 - Every file type has a formatter in `nix/treefmt.nix`, enabled in the
-  commit that adds the first file of that type. Verilog's is verible. On
-  Darwin, nixos-26.05's verible doesn't build (its Bazel dependencies no
-  longer match their hash), so `nix/treefmt.nix` applies nixpkgs master's
-  fix (NixOS/nixpkgs#541557) there. Hydra doesn't build that variant, so
-  Macs compile it once. Drop the override once nixos-26.05 has the fix.
+  commit that adds the first file of that type; images excepted, they
+  are excluded there. Verilog's is verible. On Darwin, nixos-26.05's
+  verible doesn't build (its Bazel dependencies no longer match their
+  hash), so `nix/treefmt.nix` applies nixpkgs master's fix
+  (NixOS/nixpkgs#541557) there. Hydra doesn't build that variant, so Macs
+  compile it once. Drop the override once nixos-26.05 has the fix.
 - Nothing host-specific in the repository: no hostnames, MAC addresses,
   license files or absolute paths of anyone's machine.
 - Checks never depend on the login-gated Microchip downloads. CI and

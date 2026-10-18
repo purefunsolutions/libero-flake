@@ -76,6 +76,7 @@
       settings.global.excludes = [
         "*.golden"
         "*.lic"
+        "*.png"
         ".gitignore"
         "LICENSES/*"
         "flake.lock"
