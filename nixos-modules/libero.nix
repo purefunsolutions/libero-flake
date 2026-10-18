@@ -36,6 +36,17 @@ in {
         `SYNPLCTYD_LICENSE_FILE`.
       '';
     };
+
+    simulatorLicenseServer = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = cfg.licenseServer;
+      defaultText = lib.literalExpression "config.programs.libero.licenseServer";
+      description = ''
+        The license server for the simulators, QuestaSim and ModelSim
+        (`libero-questasim`, `libero-modelsim`), which read only
+        `SALT_LICENSE_SERVER`.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -47,6 +58,9 @@ in {
       // lib.optionalAttrs (cfg.synplifyLicenseServer != null) {
         SNPSLMD_LICENSE_FILE = cfg.synplifyLicenseServer;
         SYNPLCTYD_LICENSE_FILE = cfg.synplifyLicenseServer;
+      }
+      // lib.optionalAttrs (cfg.simulatorLicenseServer != null) {
+        SALT_LICENSE_SERVER = cfg.simulatorLicenseServer;
       };
   };
 }

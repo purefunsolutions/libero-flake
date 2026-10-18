@@ -171,9 +171,10 @@ nix flake check --all-systems --no-update-lock-file &&
   RHEL `libstdc++` (`Designer/lib64/rhel`) to the library path and prints
   an unsupported-OS warning.
 - `nixos-modules/libero.nix`: `programs.libero` installs the package and
-  sets `LM_LICENSE_FILE`, `SNPSLMD_LICENSE_FILE` and
-  `SYNPLCTYD_LICENSE_FILE` as session variables. Checked with a stub
-  package by `nixos-modules/tests/libero.nix`.
+  sets `LM_LICENSE_FILE`, `SNPSLMD_LICENSE_FILE`,
+  `SYNPLCTYD_LICENSE_FILE` and the simulators' `SALT_LICENSE_SERVER` as
+  session variables. Checked with a stub package by
+  `nixos-modules/tests/libero.nix`.
 
 ## License server
 
