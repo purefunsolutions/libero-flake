@@ -18,6 +18,7 @@
           "libero-unwrapped"
           "libero-license-daemons"
           "libero-megavault"
+          "libero-modelsim"
           "libero-questasim"
         ];
     };

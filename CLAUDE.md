@@ -135,12 +135,15 @@ nix flake check --all-systems --no-update-lock-file &&
   with a marker file `p<N>`) into the vault the first time a design uses
   the core, so it needs a writable vault.
 - `pkgs/libero/simulator.nix`: `libero-questasim` (QuestaSim ME 2025.3,
-  64-bit, 7.2 GB), extracted on its own from the `Libero_SoC` archive in
-  a couple of minutes. It reads its license only from
-  `SALT_LICENSE_SERVER` (features `Microchipqsim*`, served by both saltd
-  and mgcld, one seat). Its `bin/` are links to `vco`, which picks
-  `linux_x86_64/`. `passthru.bin`, `passthru.profileTool` (Libero's name:
-  "QuestaSim ME").
+  64-bit, 7.2 GB) and `libero-modelsim` (ModelSim ME Pro 2025.3, 32-bit,
+  0.75 GB), each extracted on its own from the `Libero_SoC` archive in a
+  minute or two. They read their license only from
+  `SALT_LICENSE_SERVER` (features `Microchipqsim*`, `microsemimsim` and
+  `actelmsim*`, each served by both saltd and mgcld, one seat).
+  QuestaSim's `bin/` are links to `vco`, which picks
+  `linux_x86_64/`; `vco` doesn't know ModelSim's `linuxacoem/`, so its
+  binaries run directly. `passthru.bin`, `passthru.profileTool` (Libero's
+  name: "QuestaSim ME", "ModelSim Pro Edition").
 - `pkgs/libero/package.nix`: buildFHSEnv with the 74 system libraries
   Libero doesn't bundle (from a scan of the ELF dependencies; the binaries
   use the standard loader, no LSB shim). The launch scripts call

@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Mika Tammi
 # SPDX-License-Identifier: MIT
 #
-# One of the HDL simulators in Libero SoC's installation tree, in its
-# Microchip edition, extracted from the offline installer on its own:
-# designs that never simulate don't need it. The Libero license covers it,
-# through its Siemens vendor daemons (saltd, mgcld). It runs inside
-# libero's FHS environment.
+# One of the HDL simulators in Libero SoC's installation tree, QuestaSim
+# or ModelSim in their Microchip editions, extracted from the offline
+# installer on its own: designs that never simulate don't need it. The
+# Libero license covers both, through its Siemens vendor daemons (saltd,
+# mgcld). They run inside libero's FHS environment.
 # Output: $out/opt/microchip/Libero_SoC/<dir>.
 {
   lib,
@@ -18,7 +18,8 @@
   # The simulator's directory in the Libero_SoC tree.
   dir,
   # Its executables (vsim, vlog, ...) in there. QuestaSim's bin/ holds
-  # links to its platform-picking launcher, vco.
+  # links to its platform-picking launcher, vco; vco doesn't know
+  # ModelSim's 32-bit linuxacoem/, which therefore runs directly.
   binDir,
   # Its name in Libero's simulation tool profiles (Designer/data/libero.def).
   profileTool,

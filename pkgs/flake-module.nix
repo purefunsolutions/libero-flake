@@ -13,6 +13,13 @@ let
     libero = final.callPackage ./libero/package.nix {};
     libero-license-daemons = final.callPackage ./libero-license-daemons/package.nix {};
     libero-megavault = final.callPackage ./libero/megavault.nix {};
+    libero-modelsim = final.callPackage ./libero/simulator.nix {
+      pname = "libero-modelsim";
+      dir = "ModelSim_Pro";
+      binDir = "linuxacoem";
+      profileTool = "ModelSim Pro Edition";
+      description = "ModelSim ME Pro, the HDL simulator of Microchip Libero SoC before QuestaSim";
+    };
     libero-questasim = final.callPackage ./libero/simulator.nix {
       pname = "libero-questasim";
       dir = "QuestaSim_Pro";
