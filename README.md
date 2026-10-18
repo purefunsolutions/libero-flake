@@ -247,9 +247,17 @@ conditioning circuit (CCC) puts out: the CCC's PLL multiplies the on-chip
 oscillator, and Libero derives the clock constraints. It is the example of
 a design with IP cores.
 
+`hello-fpga-blinky`'s testbench `chip`, `blinky_tb.v`, releases SW1 and
+checks that LED1 lights 2^25 oscillator periods later, 0.67 s: the carry
+out of the counter's 25 lower bits. It runs at every stage: QuestaSim
+takes about a minute before synthesis, 8 minutes after it and half an
+hour with the routed timing; ModelSim, which Libero runs without
+QuestaSim's `+acc`, takes 45 s, 6 and 14 minutes.
+
 ```sh
 nix build .#hello-fpga-blinky    # Clash -> Verilog -> Libero bundle
 nix build .#checks.<system>.hello-fpga-blinky-yosys    # LUT and FF usage
+nix run .#hello-fpga-blinky -- --simulate    # testbench chip, with Libero
 ```
 
 ## Programming the Hello FPGA kit

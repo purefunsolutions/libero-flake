@@ -3,7 +3,7 @@
 #
 # Clash blinky for the Microchip Hello FPGA kit (SmartFusion 2
 # M2S010-1VFG256): Clash -> Verilog -> Libero bundle. blinky.v wraps the
-# Clash module with the on-chip oscillator.
+# Clash module with the on-chip oscillator; blinky_tb.v is the testbench.
 {
   runCommand,
   haskellPackages,
@@ -41,4 +41,12 @@ in
     hdl = [verilog ./blinky.v];
     ioConstraints = [./blinky.pdc];
     timingConstraints = [./blinky.sdc];
+    testbenches = [
+      {
+        name = "chip";
+        hdl = [./blinky_tb.v];
+        top = "blinky_tb";
+        instance = "dut";
+      }
+    ];
   }

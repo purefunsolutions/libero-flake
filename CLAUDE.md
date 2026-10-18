@@ -275,6 +275,15 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   The kit's own 50 MHz oscillator X1 (N8) is not used: on one kit it
   stopped driving its output after most power-ups (the pin floated: a
   weak pull-down read low, none read high), and never recovered.
+- `blinky_tb.v`, testbench `chip`: the oscillator's model runs at exactly
+  50 MHz, rising at multiples of 20 ns, so with SW1 released at 1010 ns
+  LED1 lights at 1020 ns + (2^25 - 1) * 20 ns = 671089640 ns. Measured,
+  with QuestaSim and ModelSim alike: before synthesis 671089640.0 ns
+  (QuestaSim 59 s, ModelSim 45 s: Libero runs only QuestaSim with
+  `+acc`), after synthesis the same (8 min, 6 min), routed with the slow
+  corner's SDF (`-sdfmax`) 671089649.6 ns, 9.6 ns of clock and output
+  delay (29 min, 14 min). A `$fatal` watchdog ends it if LED1 never
+  lights; the oscillator never stops.
 - `hello-fpga-blinky-pll`: the counter at 400 MHz (31 bits, LEDs on bits
   28 to 30, same blink rate), clocked by `FCCC_C0`, a CCC configured
   through `cores`: VCO 800 MHz from the on-chip oscillator, divided by 2.
