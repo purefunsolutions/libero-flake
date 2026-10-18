@@ -46,6 +46,11 @@ nix flake check --all-systems --no-update-lock-file &&
   `lib.meta.availableOn`. Free packages are checks, and so are all
   packages' `passthru.tests` (named `<package>-<test>`). Unfree packages
   are not built by the checks, because they need the Microchip downloads.
+  Tools for working on this repository (`tools`) are `packages` only,
+  neither in the overlay nor checks.
+- `pkgs/optimize-screenshots`: shrinks PNG screenshots in place, for
+  `docs/`. Its build tests it in `postCheck`, after shellcheck, on images
+  drawn for the purpose; no flake check builds it.
 - `pkgs/hello-fpga-cli`: host CLI for the Hello FPGA kit's PIC32
   programmer (DirectC `.dat` files over the kit's USB serial port). Upstream
   has no license, so the package has no `meta.license`.

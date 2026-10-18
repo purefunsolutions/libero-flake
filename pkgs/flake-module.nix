@@ -40,6 +40,13 @@ let
     hello-fpga-blinky = pkgs.callPackage ./hello-fpga-blinky/package.nix {};
     hello-fpga-blinky-pll = pkgs.callPackage ./hello-fpga-blinky-pll/package.nix {};
   };
+
+  # Tools for working on this repository. Flake packages only: not part of
+  # the overlay, and no checks build them (optimize-screenshots tests itself
+  # in its own build).
+  tools = pkgs: {
+    optimize-screenshots = pkgs.callPackage ./optimize-screenshots/package.nix {};
+  };
 in {
   flake.overlays.default = final: _prev: ourPackages final // ourLibs final;
 
@@ -50,9 +57,8 @@ in {
   }: let
     # A package not available on this system is left out instead of
     # breaking evaluation.
-    packages =
-      lib.filterAttrs (_: lib.meta.availableOn pkgs.stdenv.hostPlatform)
-      (lib.mapAttrs (name: _: pkgs.${name}) (ourPackages pkgs) // designs pkgs);
+    available = lib.filterAttrs (_: lib.meta.availableOn pkgs.stdenv.hostPlatform);
+    packages = available (lib.mapAttrs (name: _: pkgs.${name}) (ourPackages pkgs) // designs pkgs);
 
     runners =
       lib.filterAttrs (_: runner: runner != null && lib.meta.availableOn pkgs.stdenv.hostPlatform runner)
@@ -62,7 +68,8 @@ in {
       lib.mapAttrs' (test: lib.nameValuePair "${name}-${test}")
       (drv.passthru.tests or {});
   in {
-    inherit packages;
+    # The tools on top of the packages the checks build.
+    packages = packages // available (tools pkgs);
 
     apps =
       lib.mapAttrs (_: runner: {

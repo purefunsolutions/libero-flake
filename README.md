@@ -314,6 +314,7 @@ and replug the kit. Over SSH, access needs the `dialout` group.
 ```sh
 nix fmt                          # format everything
 nix flake check --all-systems    # evaluate all systems, check this one
+nix run .#optimize-screenshots -- docs/<new>.png    # before committing one
 ```
 
 `nix flake check` never needs the Microchip downloads. Every commit passes
