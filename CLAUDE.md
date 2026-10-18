@@ -38,6 +38,21 @@ nix flake check --all-systems --no-update-lock-file &&
 
 - `flake.nix`: flake-parts, systems x86_64-linux, aarch64-linux and
   aarch64-darwin.
+- `.gitlab-ci.yml`: GitLab CI on x86_64-linux runners.
+  - `checks` runs `nix flake check --all-systems`.
+  - `microchip`, when the CI variable `MICROCHIP_MIRROR` names a private
+    mirror of Microchip's downloads, builds the Microchip packages and
+    the designs' runners. It fetches the downloads with Nix's built-in
+    fetcher, which reads the mirror's credentials from Nix's netrc file,
+    into the store paths `requireFile` expects; the packages build as they
+    are. One at a time, they need about 70 GB of disk at the most. They
+    stay out of the runners' binary cache both ways (no post-build hook,
+    cache.nixos.org as the only substituter): nothing built from
+    Microchip's files may be redistributed, and an Attic server on a 4 GB
+    VM ran out of memory serving the 19 GB installer.
+  - `publish-github`, on master once those passed, pushes master to
+    `github.com/purefunsolutions/libero-flake` with the deploy key in the
+    masked, protected variable `GITHUB_DEPLOY_KEY_B64`.
 - `docs/`: screenshots for the README (QuestaSim's and ModelSim's GUIs
   under Sway, taken with `grim`). Run `nix run .#optimize-screenshots -- docs/<new>.png` on
   new ones before committing them: GUI screenshots lose two thirds of their
@@ -340,6 +355,8 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
 - Commit with `git commit -s`. No other trailers.
 - `flake.lock` changes only together with the input change that needs them.
 - Every commit passes the per-commit gate (see Commands).
+- The GitLab repository is the source: merge requests go to its master,
+  which CI mirrors to GitHub. Never push to GitHub by hand.
 - Corrections to earlier commits go in as `git commit --fixup=<commit>`
   (or `--squash`) and are autosquashed before the merge request. To check
   the squashed series without touching the branch, save the gate as a

@@ -54,6 +54,7 @@
         ruff-format.enable = true;
         shellcheck.enable = true;
         shfmt.enable = true;
+        yamlfmt.enable = true;
       };
 
       # treefmt-nix has no Tcl formatter of its own.
