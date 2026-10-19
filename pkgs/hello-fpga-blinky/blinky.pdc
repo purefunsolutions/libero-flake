@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Mika Tammi
+# SPDX-License-Identifier: MIT
+#
+# Hello FPGA kit I/O, from the kit schematics (hello_fpga_kit_schematics.pdf):
+#
+#   port       pin  bank (VDDI)  net          sheets
+#   LED1       T12  4 (3.3 V)    LED1_DEBUG   4, 6: LD1, lit when driven low
+#   LED2       T13  4 (3.3 V)    LED2_DEBUG   4, 6: LD2, lit when driven low
+#   LED3       G13  1 (3.3 V)    LED3_DEBUG   4, 6: LD3, lit when driven low
+#   SW1        K1   5 (1.5 V)    PB1_DEBUG    6: pulled up, low while pressed
+#
+# The clock is the on-chip oscillator (blinky.v); the kit's 50 MHz
+# oscillator on N8 (sheet 4) is unused. Bank supplies are on sheet 7. LD4
+# and LD5 belong to the PIC32.
+set_io LED1 -pinname T12 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LED2 -pinname T13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LED3 -pinname G13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io SW1 -pinname K1 -fixed yes -iostd LVCMOS15 -DIRECTION INPUT

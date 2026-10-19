@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2026 Mika Tammi
+# SPDX-License-Identifier: MIT
+#
+# GitLab CI on x86_64-linux runners: the flake's checks, the Microchip
+# packages built from a private mirror of Microchip's downloads, and on
+# master a push to the public GitHub repository.
+stages:
+  - ci
+  - publish
+# Every system evaluated, x86_64-linux's checks built. The other systems'
+# checks are built before every commit (CLAUDE.md).
+checks:
+  stage: ci
+  interruptible: true
+  script:
+    - nix flake check --all-systems --no-update-lock-file -L
+# The Microchip packages, which no check builds, and what needs them: the
+# designs' runners. MICROCHIP_MIRROR is a CI variable with the base URL of
+# a private mirror holding Microchip's downloads under their original file
+# names; the runners' Nix has the mirror's credentials in its netrc file.
+# Nix's built-in fetcher puts each download at the store path the
+# packages' requireFile expects, so the packages build as they are. Built
+# one at a time, they need about 70 GB of disk at the most. Like the other
+# jobs, it runs in branch pipelines only: merge requests would otherwise get
+# a second pipeline with it alone.
+microchip:
+  stage: ci
+  interruptible: true
+  timeout: 3h
+  rules:
+    - if: $MICROCHIP_MIRROR && $CI_COMMIT_BRANCH
+  script:
+    # Microchip's files and what is built from them stay out of the
+    # runners' binary cache both ways: no post-build hook pushes them there,
+    # and nothing is substituted from it. They may not be redistributed, and
+    # paths of 20 GB are quicker to build again than to move through a
+    # cache: Libero unpacks in minutes.
+    - nix_build() { nix build --no-link -L --option post-build-hook "" --option substituters https://cache.nixos.org/ "$@"; }
+    - |
+      for src in libero.unwrapped.src libero-license-daemons.src; do
+        name=$(nix eval --raw ".#$src.name")
+        hash=$(nix eval --raw ".#$src.outputHash")
+        nix_build --expr "import <nix/fetchurl.nix> {
+          url = \"$MICROCHIP_MIRROR/$name\";
+          name = \"$name\";
+          hash = \"$hash\";
+        }"
+      done
+    - nix_build .#libero-license-daemons
+    - nix_build .#libero
+    - nix_build '.#libero-megavault^*'
+    - nix_build .#libero-questasim
+    - nix_build .#libero-modelsim
+    # The designs' runners (nix run .#<design>) and the kit's flash script.
+    - nix_build .#hello-fpga-blinky.runner .#hello-fpga-blinky-pll.runner .#flash-hello-fpga
+# Pushes master to the public GitHub repository, in the publish stage, so
+# only after the ci stage passed: a broken master never reaches GitHub.
+#
+# GITHUB_DEPLOY_KEY_B64 is a masked, protected CI variable holding the
+# base64 of an ed25519 private key whose public half is a deploy key with
+# write access on the GitHub repository. The remote and GitHub's host key
+# are public, so they belong in this file, which is mirrored too.
+publish-github:
+  stage: publish
+  interruptible: false
+  resource_group: github-mirror
+  variables:
+    GIT_DEPTH: "0"
+    GITHUB_REMOTE: "git@github.com:purefunsolutions/libero-flake.git"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  script:
+    - install -d -m700 "$HOME/.github-mirror"
+    - printf '%s' "$GITHUB_DEPLOY_KEY_B64" | base64 -d > "$HOME/.github-mirror/key"
+    - chmod 600 "$HOME/.github-mirror/key"
+    # GitHub's published ed25519 host key; refresh it from
+    # https://api.github.com/meta.
+    - echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$HOME/.github-mirror/known_hosts"
+    # The runner fetches only the pipeline's ref: without this, there are
+    # no tags, and --tags below pushes none.
+    - git fetch --no-recurse-submodules origin '+refs/tags/*:refs/tags/*'
+    # refs/heads/ spelled out: the runner pushes a detached HEAD, at first
+    # into an empty repository, so git can infer neither side's ref type.
+    - git -c core.sshCommand="ssh -i $HOME/.github-mirror/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$HOME/.github-mirror/known_hosts -o StrictHostKeyChecking=yes" push "$GITHUB_REMOTE" HEAD:refs/heads/master --tags
+  after_script:
+    - rm -rf "$HOME/.github-mirror"

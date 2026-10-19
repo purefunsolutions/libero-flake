@@ -1,0 +1,118 @@
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+derive_constraints_sdc
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+run_tool -name SYNTHESIZE
+run_tool -name PLACEROUTE
+run_tool -name VERIFYTIMING
+run_tool -name GENERATEPROGRAMMINGDATA
+export_bitstream_file -file_name libero_project_example -export_dir @work@/export -format {DAT STP} -trusted_facility_file 1 -trusted_facility_file_components FABRIC
+export_prog_job -job_file_name libero_project_example -export_dir @work@/export -bitstream_file_type TRUSTED_FACILITY -bitstream_file_components FABRIC
+save_project
+# LIBERO_SIMULATE=presynth LIBERO_TESTBENCH=example
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -stimulus @bundle@/testbench/example/example_tb.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+derive_constraints_sdc
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+add_profile -name mkLiberoProject -type simulation -tool {QuestaSim ME} -location /simulator/bin/vsim -batch TRUE
+set_modelsim_options -tb_module_name example_tb -tb_top_level_name dut -sim_runtime {1 ms} -dump_vcd 0 -add_vsim_options {}
+organize_tool_files -tool SIM_PRESYNTH -file @work@/project/stimulus/example_tb.v -module example::work -input_type stimulus
+save_project
+run_tool -name SIM_PRESYNTH
+save_project
+# LIBERO_SIMULATE=presynth LIBERO_TESTBENCH=other
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -stimulus @bundle@/testbench/other/other_tb.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+derive_constraints_sdc
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+add_profile -name mkLiberoProject -type simulation -tool {QuestaSim ME} -location /simulator/bin/vsim -batch TRUE
+set_modelsim_options -tb_module_name other_tb -tb_top_level_name example_0 -sim_runtime -all -dump_vcd 0 -add_vsim_options {}
+organize_tool_files -tool SIM_PRESYNTH -file @work@/project/stimulus/other_tb.v -module example::work -input_type stimulus
+save_project
+run_tool -name SIM_PRESYNTH
+save_project
+# LIBERO_SIMULATE=postsynth LIBERO_TESTBENCH=example LIBERO_SIMULATION_VCD=testbench
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -stimulus @bundle@/testbench/example/example_tb.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+derive_constraints_sdc
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+add_profile -name mkLiberoProject -type simulation -tool {QuestaSim ME} -location /simulator/bin/vsim -batch TRUE
+set_modelsim_options -tb_module_name example_tb -tb_top_level_name dut -sim_runtime {1 ms} -dump_vcd 0 -add_vsim_options {-do vcd.do}
+organize_tool_files -tool SIM_POSTSYNTH -file @work@/project/stimulus/example_tb.v -module example::work -input_type stimulus
+save_project
+run_tool -name SIM_POSTSYNTH
+save_project
+# vcd.do: vcd file example_tb.vcd
+# vcd.do: vcd add /example_tb/*
+# LIBERO_SIMULATE=postlayout LIBERO_TESTBENCH=example LIBERO_SIMULATION_GUI=1 LIBERO_SIMULATION_VCD=all
+new_project -location @work@/project -name libero_project_example -project_description {} -block_mode 0 -hdl VERILOG -family SmartFusion2 -die M2S010 -package {256 VF} -speed -1 -die_voltage 1.2 -part_range COM -use_enhanced_constraint_flow 1
+change_vault_location -location /vault
+create_and_configure_core -core_vlnv Actel:SgCore:FCCC:2.0.201 -component_name FCCC_C0 -params {GL0_IS_USED:true GL0_OUT_0_FREQ:100 PLL_IN_FREQ:50.000 PLL_IN_SRC:OSC_50MHZ}
+generate_component -component_name FCCC_C0
+import_files -hdl_source @bundle@/hdl/example.v
+import_files -stimulus @bundle@/testbench/example/example_tb.v
+import_files -io_pdc @bundle@/constraints/io/example.pdc
+import_files -sdc @bundle@/constraints/timing/example.sdc
+build_design_hierarchy
+set_root -module example::work
+derive_constraints_sdc
+organize_tool_files -tool SYNTHESIZE -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool PLACEROUTE -file @work@/project/constraint/io/example.pdc -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+organize_tool_files -tool VERIFYTIMING -file @work@/project/constraint/example.sdc -module example::work -input_type constraint
+save_project
+add_profile -name mkLiberoProject -type simulation -tool {QuestaSim ME} -location /simulator/bin/vsim -batch TRUE
+set_modelsim_options -tb_module_name example_tb -tb_top_level_name dut -sim_runtime 0ns -dump_vcd 0 -add_vsim_options {-do vcd.do}
+organize_tool_files -tool SIM_POSTLAYOUT -file @work@/project/stimulus/example_tb.v -module example::work -input_type stimulus
+save_project
+run_tool -name SIM_POSTLAYOUT
+save_project
+# vcd.do: vcd file example_tb.vcd
+# vcd.do: vcd add -r /*
+# gui.do: vlog -sv -work presynth stimulus/tb.v
+# gui.do: vsim -L SmartFusion2 -L presynth -t 1fs presynth.tb -onfinish stop
+# gui.do: add wave /example_tb/*
+# gui.do: run 1 ms
+# gui.do: log -r /tb/*
