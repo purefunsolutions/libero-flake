@@ -20,3 +20,9 @@ SPDX-License-Identifier = "MIT"
 path = "docs/*.png"
 SPDX-FileCopyrightText = "2026 Mika Tammi"
 SPDX-License-Identifier = "MIT"
+
+# A photo of the Hello FPGA kit for the README.
+[[annotations]]
+path = "docs/setup.jpg"
+SPDX-FileCopyrightText = "2026 Mika Tammi"
+SPDX-License-Identifier = "MIT"

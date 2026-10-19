@@ -7,7 +7,10 @@ SPDX-License-Identifier: MIT
 
 Nix flake for the Microchip Libero SoC FPGA toolchain. Libero covers
 PolarFire, PolarFire SoC, SmartFusion 2, IGLOO 2, RTG4, RT PolarFire and
-RT PolarFire SoC.
+RT PolarFire SoC. The first board here is Microchip's Hello FPGA kit,
+below with a webcam watching its LEDs.
+
+<img src="docs/setup.jpg" width="379" alt="The Hello FPGA kit next to its box, its LEDs lit, and a webcam pointed at it">
 
 ## Platforms
 

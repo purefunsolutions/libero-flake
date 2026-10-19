@@ -76,6 +76,7 @@
       # for byte as they are.
       settings.global.excludes = [
         "*.golden"
+        "*.jpg"
         "*.lic"
         "*.png"
         ".gitignore"

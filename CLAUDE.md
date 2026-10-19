@@ -59,6 +59,11 @@ nix flake check --all-systems --no-update-lock-file &&
   size to 256 colours without dithering (PSNR 50 dB and more, nothing to
   see) and oxipng with Zopfli. More Zopfli iterations don't pay: 255 took
   8 minutes per image for 0.2 % less than the default 15 in 15 s.
+  The photo `setup.jpg` is a quality-90 JPEG re-encoded with jpegli
+  (`cjpegli -d 0.7`, then `jpegtran -copy none -optimize -progressive`):
+  9 % smaller, ssimulacra2 90.6 against the original's pixels (90 and
+  more is visually lossless), no metadata. Lossless recompression alone
+  saved 4 %; guetzli and mozjpeg needed more bytes for a score of 90.
 - `nix/`: flake-parts modules. `treefmt.nix` (formatters, `checks.treefmt`),
   `checks.nix` (`reuse lint`) and `nixpkgs.nix` (the `pkgs` every perSystem
   module sees: nixpkgs plus our overlay).
