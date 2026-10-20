@@ -52,7 +52,7 @@ microchip:
     - nix_build .#libero-questasim
     - nix_build .#libero-modelsim
     # The designs' runners (nix run .#<design>) and the kit's flash script.
-    - nix_build .#hello-fpga-blinky.runner .#hello-fpga-blinky-pll.runner .#flash-hello-fpga
+    - nix_build .#hello-fpga-blinky.runner .#hello-fpga-blinky-pll.runner .#hello-fpga-nixos-logo.runner .#flash-hello-fpga
 # Pushes master to the public GitHub repository, in the publish stage, so
 # only after the ci stage passed: a broken master never reaches GitHub.
 #

@@ -279,6 +279,41 @@ nix run .#hello-fpga-blinky -- --simulate    # testbench chip, with Libero
 nix run .#hello-fpga-blinky -- --simulate --testbench core
 ```
 
+The kit's LCD board carries a 3.5" panel of 480 by 320 pixels with an
+ILI9488 controller, on an 8-bit parallel bus. `hello-fpga-nixos-logo`
+draws the NixOS logo on it: the rainbow snowflake from
+[NixOS/nixos-artwork][nixos-artwork], which the build downloads. Below,
+the kit drawing it, photographed and through the webcam; neither camera
+gets the panel's colours quite right.
+
+<img src="docs/nixos-logo.jpg" height="290" alt="The Hello FPGA kit's LCD showing the NixOS rainbow snowflake">
+<img src="docs/nixos-logo-webcam.jpg" height="290" alt="The same LCD through the webcam">
+
+No memory holds the picture. Each edge of the snowflake's six lambdas is
+a linear function of the pixel's position, stepped by one addition per
+pixel. A pixel is inside a lambda when an odd number of its edges lie to
+its left, the SVG's own rule, and takes its colour from the lambda's
+gradient. `flake-geometry.py` derives these functions from the SVG.
+
+Writing the frame takes 37 ms, and LED1 lights when it is done. SW1
+draws it again.
+
+Its check `frame` needs no Microchip software. It simulates the Clash
+design clock by clock, decodes what it writes to the panel, and checks
+the panel's timing and commands. It compares the frame bit for bit with a
+direct model of the renderer, and with `rsvg-convert`'s rendering of the
+SVG, from which only 8 pixels on edges differ.
+
+```sh
+nix build .#checks.<system>.hello-fpga-nixos-logo-frame    # frame.png, diff.png
+nix run .#hello-fpga-nixos-logo    # Libero: out/hello-fpga-nixos-logo/
+nix run .#flash-hello-fpga -- out/hello-fpga-nixos-logo
+```
+
+The NixOS logo was designed by Simon Frankau and revised by Tim
+Cuthbertson. It is licensed under CC BY 4.0; piegames added the rainbow
+variant to nixos-artwork.
+
 ## Programming the Hello FPGA kit
 
 The kit's on-board PIC32 programs the SmartFusion 2 from a DirectC `.dat`
@@ -337,6 +372,9 @@ the checks of all three systems; `CLAUDE.md` has the command.
 The Nix code and scripts in this repository are licensed under the MIT
 license, see `LICENSES/MIT.txt`. Microchip's software is proprietary: every
 user downloads it from Microchip themselves, and nothing built from it may
-be redistributed.
+be redistributed. The pictures of the kit's LCD, `docs/nixos-logo*.jpg`,
+show the NixOS logo and are licensed under CC BY 4.0 like the logo, see
+`LICENSES/CC-BY-4.0.txt`.
 
 [hello-fpga-cli]: https://github.com/captndo/hello-fpga-cli
+[nixos-artwork]: https://github.com/NixOS/nixos-artwork/tree/master/logo

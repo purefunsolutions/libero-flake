@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 Mika Tammi
+# SPDX-License-Identifier: MIT
+#
+# Hello FPGA kit I/O for the LCD board, which sits on the expansion headers
+# P1 and P2. From the kit schematics (hello_fpga_kit_schematics.pdf), UG0903
+# "Pin-Outs of Hello FPGA Expansion Connectors" (tables 7 and 8) and the
+# LCD board's schematic (hello_fpga_lcd_boards_schematics.pdf):
+#
+#   port       pin  bank (VDDI)  header  sheets
+#   LCD_D[0]   G14  2 (3.3 V)    P1-4    10
+#   LCD_D[1]   K14  2 (3.3 V)    P1-6    10
+#   LCD_D[2]   K15  2 (3.3 V)    P1-8    10
+#   LCD_D[3]   K16  2 (3.3 V)    P1-10   10
+#   LCD_D[4]   G5   7 (3.3 V)    P1-12   10
+#   LCD_D[5]   F4   7 (3.3 V)    P1-14   10
+#   LCD_D[6]   F2   7 (3.3 V)    P1-16   10
+#   LCD_D[7]   G2   7 (3.3 V)    P1-18   10
+#   LCD_CS     H4   7 (3.3 V)    P1-20   10
+#   LCD_RS     L11  2 (3.3 V)    P2-3    10
+#   LCD_WR     P13  4 (3.3 V)    P2-5    10
+#   LCD_RD     H3   7 (3.3 V)    P2-7    10
+#   LCD_RST    L13  2 (3.3 V)    P2-9    10
+#   LED1       T12  4 (3.3 V)            4, 6: LD1, lit when driven low
+#   LED2       T13  4 (3.3 V)            4, 6: LD2, lit when driven low
+#   LED3       G13  1 (3.3 V)            4, 6: LD3, lit when driven low
+#   SW1        K1   5 (1.5 V)            6: pulled up, low while pressed
+#   DEVRST_N   M11  dedicated            6: 10k pull-up, 1 uF to ground
+#
+# Sheet 10 draws P1's pin 18 above pin 16; the pin numbers, which the board
+# follows, put D6 on F2 and D7 on G2, as UG0903 does, and as the colours on
+# the kit confirm. Microchip's demo designs for the kit have them the other
+# way round. Bank supplies are on sheet 7.
+set_io {LCD_D[0]} -pinname G14 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[1]} -pinname K14 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[2]} -pinname K15 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[3]} -pinname K16 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[4]} -pinname G5 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[5]} -pinname F4 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[6]} -pinname F2 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io {LCD_D[7]} -pinname G2 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LCD_CS -pinname H4 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LCD_RS -pinname L11 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LCD_WR -pinname P13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LCD_RD -pinname H3 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LCD_RST -pinname L13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LED1 -pinname T12 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LED2 -pinname T13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io LED3 -pinname G13 -fixed yes -iostd LVCMOS33 -DIRECTION OUTPUT
+set_io SW1 -pinname K1 -fixed yes -iostd LVCMOS15 -DIRECTION INPUT
+# A dedicated pad, with neither an I/O standard nor a choice of pin: this
+# is how Libero itself writes it out.
+set_io DEVRST_N -pinname M11 -DIRECTION INPUT

@@ -26,3 +26,13 @@ SPDX-License-Identifier = "MIT"
 path = "docs/setup.jpg"
 SPDX-FileCopyrightText = "2026 Mika Tammi"
 SPDX-License-Identifier = "MIT"
+
+# The kit's LCD showing hello-fpga-nixos-logo's frame, photographed and
+# through the webcam: pictures of the NixOS logo, CC BY 4.0 like the logo.
+[[annotations]]
+path = ["docs/nixos-logo.jpg", "docs/nixos-logo-webcam.jpg"]
+SPDX-FileCopyrightText = [
+  "2026 Mika Tammi",
+  "Simon Frankau and Tim Cuthbertson (the NixOS logo)",
+]
+SPDX-License-Identifier = "CC-BY-4.0"
