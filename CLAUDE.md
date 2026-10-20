@@ -333,6 +333,75 @@ at 1.5 V. LD4 and LD5 belong to the PIC32.
   `$finish(0)` prints nothing. Before synthesis only: Synplify keeps the
   core as a module but renames its ports (`counter_i`, `clk`, `SW1_c`).
 
+### LCD
+
+The LCD board sits on P1 and P2: Leopard Imaging's LI-LCD-IFB-MICRO
+(`hello_fpga_lcd_boards_schematics.pdf`) with a 3.5" 320x480 ILI9488
+panel. Its IM2..0 = 011 select MIPI DBI Type B with 8 bits. The backlight
+runs on its own from 5 V (AL5812); touch is not connected. Pins from sheet
+10 and UG0903 ("Pin-Outs of Hello FPGA Expansion Connectors", tables 7
+and 8):
+
+| Signal    | Pins               | Bank (VDDI) | Header            |
+| --------- | ------------------ | ----------- | ----------------- |
+| LCD_D0..3 | G14, K14, K15, K16 | 2 (3.3 V)   | P1-4, 6, 8, 10    |
+| LCD_D4..7 | G5, F4, F2, G2     | 7 (3.3 V)   | P1-12, 14, 16, 18 |
+| LCD_CS    | H4                 | 7 (3.3 V)   | P1-20             |
+| LCD_RS    | L11                | 2 (3.3 V)   | P2-3              |
+| LCD_WR    | P13                | 4 (3.3 V)   | P2-5              |
+| LCD_RD    | H3                 | 7 (3.3 V)   | P2-7              |
+| LCD_RST   | L13                | 2 (3.3 V)   | P2-9              |
+
+- Microchip's demo designs for the kit put LCD_D6 on G2 and LCD_D7 on F2
+  (sheet 10 draws P1's pin 18 above pin 16). The pin numbers and UG0903
+  are right: verified on the kit, where the swap turns the logo's blue
+  green and its purple crimson.
+- ILI9488 (datasheet V100): the panel takes the bus on WR's rising edge.
+  A write cycle takes at least 40 ns, WR's pulses 15 ns, data setup and
+  hold 10 ns. RESX goes low for at least 10 us, then 5 ms pass before any
+  command and 120 ms before Sleep Out and after it. COLMOD 0x66: 18 bits
+  per pixel as three bytes, the colour on D7..D2. MADCTL 0x28 (row/column
+  exchange, BGR) is upright landscape on the kit; the demos' 0x68 and
+  0xA8 mirror it. The panel's own defaults need no power, VCOM or gamma
+  settings.
+- SmartFusion 2 flip-flops have no power-up value, so a design with state
+  needs `SYSRESET`'s `POWER_ON_RESET_N`. DEVRST_N (M11, sheet 6: 10k
+  pull-up, 1 uF) is a dedicated pad, in the PDC only as
+  `set_io DEVRST_N -pinname M11 -DIRECTION INPUT`, the way Libero writes
+  it. Synplify and Yosys know SYSRESET and CLKINT; declare neither.
+- `hello-fpga-nixos-logo` draws the NixOS rainbow snowflake on the LCD,
+  350x304 pixels centred on white. The SVG (nixos-artwork's
+  `nix-snowflake-rainbow.svg`, CC BY 4.0) is fetched at build time; the
+  repository holds no artwork.
+  - `flake-geometry.py` turns it into `Geometry.hs`. Each of the 38 edges
+    that cross a pixel row (of 54) is E = A*x + B*y + C in 1/4096 pixel
+    at pixel centres, with its row span. Each is anchored at the edge's
+    midpoint: anchored at pixel (0, 0), near-horizontal edges crossed rows
+    up to 2.6 px off. Each lambda has a gradient parameter in 1/65536,
+    and two segments with per-channel slopes (shift 24). The widths are
+    computed: Signed 22 and Signed 19.
+  - The renderer steps each function by one addition per pixel, exactly.
+    It uses the even-odd rule, and the last lambda wins (none overlap).
+    Five pipeline registers follow; the colour is base + (d * slope) >> 24
+    in three MACCs.
+  - A register evaluates a `Vec` only to its outer constructor. `stepped`
+    evaluates the elements too (`foldr seq`); otherwise the simulation
+    keeps hundreds of MB of unevaluated sums.
+  - The sequencer writes 4 clocks per byte, D/RS changing only while WR
+    is high (tast 20 ns, tdst 60 ns, tdht 20 ns). It waits 10, 150 and
+    150 ms (the oscillator's 1 %), writes the frame before Display On, and
+    lights LED1 when done. SW1 draws it again.
+  - Libero: 1761 LUTs, 1250 flip-flops, 3 MACCs, 14.6 ns of setup slack
+    at 50 MHz, two minutes.
+- Its check `frame` (`FrameTest.hs`, plain GHC, about 20 s) simulates the
+  core with short waits and decodes the bus. It checks:
+  - the timing with the oscillator 1 % fast, and the command list;
+  - the frame, bit for bit, against the renderer's functions applied to
+    directly evaluated edge and gradient functions;
+  - against `rsvg-convert --stylesheet` (crispEdges, `!important` against
+    the paths' inline styles) of the same SVG in the same place: at most
+    32 pixels may differ, all on edges (8 with librsvg 2.62).
+
 ## Conventions
 
 - Every file has SPDX copyright and license comments (`MIT`,

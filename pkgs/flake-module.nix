@@ -39,6 +39,7 @@ let
   designs = pkgs: {
     hello-fpga-blinky = pkgs.callPackage ./hello-fpga-blinky/package.nix {};
     hello-fpga-blinky-pll = pkgs.callPackage ./hello-fpga-blinky-pll/package.nix {};
+    hello-fpga-nixos-logo = pkgs.callPackage ./hello-fpga-nixos-logo/package.nix {};
   };
 
   # Tools for working on this repository. Flake packages only: not part of
