@@ -64,6 +64,13 @@ nix flake check --all-systems --no-update-lock-file &&
   9 % smaller, ssimulacra2 90.6 against the original's pixels (90 and
   more is visually lossless), no metadata. Lossless recompression alone
   saved 4 %; guetzli and mozjpeg needed more bytes for a score of 90.
+  The pictures of the LCD drawing the NixOS logo are CC-BY-4.0 like the
+  logo (`REUSE.toml`). `nixos-logo.jpg` is Mika's photo, cropped to the
+  kit with the webcam in the corner and encoded with `cjpegli -q 85`
+  (69 kB; jpegli's output is already optimized and progressive, and
+  `jpegtran` only made it bigger).
+  `nixos-logo-webcam.jpg` is a webcam frame cropped losslessly with
+  `jpegtran -copy none -optimize -progressive -crop`.
 - `nix/`: flake-parts modules. `treefmt.nix` (formatters, `checks.treefmt`),
   `checks.nix` (`reuse lint`) and `nixpkgs.nix` (the `pkgs` every perSystem
   module sees: nixpkgs plus our overlay).
@@ -406,7 +413,8 @@ and 8):
 
 - Every file has SPDX copyright and license comments (`MIT`,
   "2026 Mika Tammi"). Files that can't hold comments are annotated in
-  `REUSE.toml`.
+  `REUSE.toml`. The only exception: pictures of the NixOS logo, which are
+  CC-BY-4.0 like the logo.
 - Every file type has a formatter in `nix/treefmt.nix`, enabled in the
   commit that adds the first file of that type; images excepted, they
   are excluded there. Verilog's is verible. On Darwin, nixos-26.05's

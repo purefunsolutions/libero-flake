@@ -282,7 +282,12 @@ nix run .#hello-fpga-blinky -- --simulate --testbench core
 The kit's LCD board carries a 3.5" panel of 480 by 320 pixels with an
 ILI9488 controller, on an 8-bit parallel bus. `hello-fpga-nixos-logo`
 draws the NixOS logo on it: the rainbow snowflake from
-[NixOS/nixos-artwork][nixos-artwork], which the build downloads.
+[NixOS/nixos-artwork][nixos-artwork], which the build downloads. Below,
+the kit drawing it, photographed and through the webcam; neither camera
+gets the panel's colours quite right.
+
+<img src="docs/nixos-logo.jpg" height="290" alt="The Hello FPGA kit's LCD showing the NixOS rainbow snowflake">
+<img src="docs/nixos-logo-webcam.jpg" height="290" alt="The same LCD through the webcam">
 
 No memory holds the picture. Each edge of the snowflake's six lambdas is
 a linear function of the pixel's position, stepped by one addition per
@@ -367,7 +372,9 @@ the checks of all three systems; `CLAUDE.md` has the command.
 The Nix code and scripts in this repository are licensed under the MIT
 license, see `LICENSES/MIT.txt`. Microchip's software is proprietary: every
 user downloads it from Microchip themselves, and nothing built from it may
-be redistributed.
+be redistributed. The pictures of the kit's LCD, `docs/nixos-logo*.jpg`,
+show the NixOS logo and are licensed under CC BY 4.0 like the logo, see
+`LICENSES/CC-BY-4.0.txt`.
 
 [hello-fpga-cli]: https://github.com/captndo/hello-fpga-cli
 [nixos-artwork]: https://github.com/NixOS/nixos-artwork/tree/master/logo
